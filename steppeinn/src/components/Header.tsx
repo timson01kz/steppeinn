@@ -1,0 +1,64 @@
+import Link from "next/link";
+import { LanguageSwitcher } from "./LanguageSwitcher";
+
+const navItems = [
+  { label: "Hotels", href: "/hotels" },
+  { label: "Map", href: "/map" },
+  { label: "AI Search", href: "/ai-search" },
+  { label: "For hotels", href: "/for-hotels" },
+];
+
+type HeaderProps = {
+  overlay?: boolean;
+};
+
+export function Header({ overlay = false }: HeaderProps) {
+  return (
+    <header
+      className={`relative z-20 mx-auto flex w-full max-w-7xl items-center justify-between px-5 py-5 sm:px-8 ${
+        overlay ? "text-white" : "text-[#17130f]"
+      }`}
+    >
+      <Link className="flex items-center gap-3" href="/">
+        <span
+          className={`flex h-11 w-11 items-center justify-center rounded-md text-lg font-black shadow-lg ${
+            overlay ? "bg-white text-[#1f4d43]" : "bg-[#1f4d43] text-white"
+          }`}
+        >
+          S
+        </span>
+        <span className="text-xl font-semibold tracking-[0.08em]">SteppeInn</span>
+      </Link>
+
+      <nav className="hidden items-center gap-8 text-sm font-semibold lg:flex">
+        {navItems.map((item) => (
+          <Link
+            className={`transition ${
+              overlay ? "text-white/82 hover:text-white" : "text-stone-600 hover:text-[#17130f]"
+            }`}
+            href={item.href}
+            key={item.href}
+          >
+            {item.label}
+          </Link>
+        ))}
+      </nav>
+
+      <div className="flex items-center gap-2">
+        <div className="hidden md:block">
+          <LanguageSwitcher variant={overlay ? "light" : "dark"} />
+        </div>
+        <Link
+          className={`rounded-full px-5 py-2.5 text-sm font-bold shadow-sm transition ${
+            overlay
+              ? "bg-white text-[#1f4d43] hover:bg-[#f4ead9]"
+              : "bg-[#17130f] text-white hover:bg-[#2f4d46]"
+          }`}
+          href="/login"
+        >
+          Login
+        </Link>
+      </div>
+    </header>
+  );
+}
