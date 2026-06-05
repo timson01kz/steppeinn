@@ -17,6 +17,35 @@ create table profiles (
   updated_at timestamptz not null default now()
 );
 
+create or replace function handle_new_user_profile()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  insert into profiles (id, role, full_name, preferred_language, country)
+  values (
+    new.id,
+    case
+      when new.raw_user_meta_data ->> 'role' in ('client', 'owner', 'admin')
+        then (new.raw_user_meta_data ->> 'role')::user_role
+      else 'client'
+    end,
+    new.raw_user_meta_data ->> 'full_name',
+    'RU',
+    'Kazakhstan'
+  )
+  on conflict (id) do nothing;
+
+  return new;
+end;
+$$;
+
+create trigger on_auth_user_created
+  after insert on auth.users
+  for each row execute procedure handle_new_user_profile();
+
 create table cities (
   id uuid primary key default gen_random_uuid(),
   name text not null,
@@ -45,7 +74,8 @@ create table locations (
   metadata jsonb,
   is_active boolean not null default true,
   created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
+  updated_at timestamptz not null default now(),
+  unique (city_id, name)
 );
 
 create table properties (
