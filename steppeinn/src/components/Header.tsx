@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { HeaderAuthActions } from "./HeaderAuthActions";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 
 const navItems = [
@@ -48,16 +49,7 @@ export function Header({ overlay = false }: HeaderProps) {
         <div className="hidden md:block">
           <LanguageSwitcher variant={overlay ? "light" : "dark"} />
         </div>
-        <Link
-          className={`rounded-full px-5 py-2.5 text-sm font-bold shadow-sm transition ${
-            overlay
-              ? "bg-white text-[#1f4d43] hover:bg-[#f4ead9]"
-              : "bg-[#17130f] text-white hover:bg-[#2f4d46]"
-          }`}
-          href="/login"
-        >
-          Login
-        </Link>
+        <HeaderAuthActions overlay={overlay} />
       </div>
     </header>
   );

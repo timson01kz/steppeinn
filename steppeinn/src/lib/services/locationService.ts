@@ -1,4 +1,4 @@
-import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { createServiceSupabaseClient } from "@/lib/supabase/server";
 import type { LocationCardData } from "@/types";
 import type { ServiceResult } from "./types";
 
@@ -21,7 +21,7 @@ export async function getAlmatyLocations(): Promise<
   ServiceResult<LocationCardData[]>
 > {
   try {
-    const supabase = createServerSupabaseClient();
+    const supabase = createServiceSupabaseClient();
     const { data, error } = await supabase
       .from("locations")
       .select("name, category, description, description_en")

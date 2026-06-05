@@ -1,9 +1,9 @@
-import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { createServiceSupabaseClient } from "@/lib/supabase/server";
 import type { ServiceResult } from "./types";
 
 export async function getPublishedPropertiesCount(): Promise<ServiceResult<number>> {
   try {
-    const supabase = createServerSupabaseClient();
+    const supabase = createServiceSupabaseClient();
     const { count, error } = await supabase
       .from("properties")
       .select("id", { count: "exact", head: true })

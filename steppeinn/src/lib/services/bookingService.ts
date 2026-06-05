@@ -1,4 +1,4 @@
-import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { createServiceSupabaseClient } from "@/lib/supabase/server";
 import type { ServiceResult } from "./types";
 
 export async function createBookingRequest(input: {
@@ -12,7 +12,7 @@ export async function createBookingRequest(input: {
   comment?: string;
 }): Promise<ServiceResult<{ id: string } | null>> {
   try {
-    const supabase = createServerSupabaseClient();
+    const supabase = createServiceSupabaseClient();
     const { data, error } = await supabase
       .from("bookings")
       .insert({
