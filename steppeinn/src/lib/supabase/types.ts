@@ -49,6 +49,7 @@ export type Database = {
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["profiles"]["Insert"]>;
+        Relationships: [];
       };
       properties: {
         Row: {
@@ -118,6 +119,7 @@ export type Database = {
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["properties"]["Insert"]>;
+        Relationships: [];
       };
       property_media: GenericMediaTable;
       rooms: {
@@ -144,6 +146,7 @@ export type Database = {
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["rooms"]["Insert"]>;
+        Relationships: [];
       };
       room_media: GenericMediaTable;
       bookings: {
@@ -186,6 +189,7 @@ export type Database = {
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["bookings"]["Insert"]>;
+        Relationships: [];
       };
       favorites: SimpleJoinTable;
       reviews: {
@@ -210,6 +214,7 @@ export type Database = {
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["reviews"]["Insert"]>;
+        Relationships: [];
       };
       cities: {
         Row: {
@@ -237,6 +242,7 @@ export type Database = {
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["cities"]["Insert"]>;
+        Relationships: [];
       };
       locations: {
         Row: {
@@ -272,10 +278,12 @@ export type Database = {
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["locations"]["Insert"]>;
+        Relationships: [];
       };
       advertisements: NamedTable;
       tariffs: NamedTable;
     };
+    Views: Record<string, never>;
     Functions: {
       nearby_properties: {
         Args: {
@@ -291,6 +299,7 @@ export type Database = {
         }[];
       };
     };
+    CompositeTypes: Record<string, never>;
   };
 };
 
@@ -316,6 +325,7 @@ type GenericMediaTable = {
     updated_at?: string;
   };
   Update: Partial<GenericMediaTable["Insert"]>;
+  Relationships: [];
 };
 
 type SimpleJoinTable = {
@@ -334,6 +344,7 @@ type SimpleJoinTable = {
     updated_at?: string;
   };
   Update: Partial<SimpleJoinTable["Insert"]>;
+  Relationships: [];
 };
 
 type NamedTable = {
@@ -356,4 +367,5 @@ type NamedTable = {
     updated_at?: string;
   };
   Update: Partial<NamedTable["Insert"]>;
+  Relationships: [];
 };

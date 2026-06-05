@@ -45,7 +45,8 @@ create table locations (
   metadata jsonb,
   is_active boolean not null default true,
   created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
+  updated_at timestamptz not null default now(),
+  unique (city_id, name)
 );
 
 create table properties (
