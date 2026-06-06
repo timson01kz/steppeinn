@@ -342,6 +342,8 @@ type GenericMediaTable = {
     room_id: string | null;
     url: string;
     media_type: string;
+    alt_text: string | null;
+    is_primary: boolean;
     sort_order: number;
     created_at: string;
     updated_at: string;
@@ -352,6 +354,8 @@ type GenericMediaTable = {
     room_id?: string | null;
     url: string;
     media_type: string;
+    alt_text?: string | null;
+    is_primary?: boolean;
     sort_order?: number;
     created_at?: string;
     updated_at?: string;

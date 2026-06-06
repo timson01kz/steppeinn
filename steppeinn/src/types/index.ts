@@ -2,6 +2,7 @@ export type HotelCardData = {
   name: string;
   area: string;
   imageClass: string;
+  imageUrl?: string;
   rating: string;
   distance: string;
   price: string;

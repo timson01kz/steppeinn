@@ -16,6 +16,7 @@ export type OwnerDashboardProperty = {
   requests: number;
   moderationNotes: string | null;
   moderationHistory: PropertyModerationEvent[];
+  photos: PropertyPhoto[];
 };
 
 export type AdminModerationProperty = {
@@ -32,6 +33,28 @@ export type PropertyModerationEvent = {
   status: PropertyStatus;
   notes: string | null;
   date: string;
+};
+
+export type PropertyPhoto = {
+  id: string;
+  propertyId: string;
+  url: string;
+  altText: string | null;
+  sortOrder: number;
+  isPrimary: boolean;
+};
+
+export type PublicPropertyDetail = {
+  id: string;
+  name: string;
+  slug: string;
+  address: string;
+  type: string;
+  rating: string;
+  price: string;
+  description: string;
+  amenities: string[];
+  photos: PropertyPhoto[];
 };
 
 export async function getPublishedPropertiesCount(): Promise<ServiceResult<number>> {
@@ -83,16 +106,32 @@ export async function getCurrentOwnerProperties(): Promise<
     }
 
     const propertyIds = (data ?? []).map((property) => property.id);
-    const { data: events, error: eventsError } = propertyIds.length
-      ? await supabase
-          .from("property_moderation_events")
-          .select("id,property_id,status,notes,created_at")
-          .in("property_id", propertyIds)
-          .order("created_at", { ascending: false })
-      : { data: [], error: null };
+    const [{ data: events, error: eventsError }, { data: photos, error: photosError }] =
+      propertyIds.length
+        ? await Promise.all([
+            supabase
+              .from("property_moderation_events")
+              .select("id,property_id,status,notes,created_at")
+              .in("property_id", propertyIds)
+              .order("created_at", { ascending: false }),
+            supabase
+              .from("property_media")
+              .select("id,property_id,url,alt_text,sort_order,is_primary")
+              .in("property_id", propertyIds)
+              .eq("media_type", "image")
+              .order("sort_order", { ascending: true }),
+          ])
+        : [
+            { data: [], error: null },
+            { data: [], error: null },
+          ];
 
     if (eventsError) {
       return { data: [], error: eventsError.message };
+    }
+
+    if (photosError) {
+      return { data: [], error: photosError.message };
     }
 
     const eventsByProperty = new Map<string, PropertyModerationEvent[]>();
@@ -107,6 +146,8 @@ export async function getCurrentOwnerProperties(): Promise<
       eventsByProperty.set(event.property_id, current);
     });
 
+    const photosByProperty = groupPhotosByProperty(photos ?? []);
+
     return {
       data: (data ?? []).map((property) => ({
         id: property.id,
@@ -118,6 +159,7 @@ export async function getCurrentOwnerProperties(): Promise<
         requests: 0,
         moderationNotes: property.moderation_notes,
         moderationHistory: eventsByProperty.get(property.id) ?? [],
+        photos: photosByProperty.get(property.id) ?? [],
       })),
       error: null,
     };
@@ -186,8 +228,23 @@ export async function getPublishedCatalogProperties(): Promise<
       return { data: [], error: error.message };
     }
 
+    const mediaByProperty = await getPublicMediaByProperty(
+      supabase,
+      (data ?? []).map((property) => property.id),
+    );
+
+    if (mediaByProperty.error) {
+      return { data: [], error: mediaByProperty.error };
+    }
+
     return {
-      data: (data ?? []).map((property, index) => toCatalogHotel(property, index)),
+      data: (data ?? []).map((property, index) =>
+        toCatalogHotel(
+          property,
+          index,
+          pickPrimaryPhoto(mediaByProperty.data.get(property.id) ?? [])?.url,
+        ),
+      ),
       error: null,
     };
   } catch (error) {
@@ -201,8 +258,68 @@ export async function getPublishedCatalogProperties(): Promise<
   }
 }
 
+export async function getPublishedPropertyDetail(
+  slug: string,
+): Promise<ServiceResult<PublicPropertyDetail | null>> {
+  try {
+    const supabase = createServiceSupabaseClient();
+    const { data: property, error } = await supabase
+      .from("properties")
+      .select(
+        "id,name,slug,address,city,property_type,rating,price_from,amenities,description,short_description",
+      )
+      .eq("status", "published")
+      .eq("slug", slug)
+      .maybeSingle();
+
+    if (error) {
+      return { data: null, error: error.message };
+    }
+
+    if (!property) {
+      return { data: null, error: null };
+    }
+
+    const mediaByProperty = await getPublicMediaByProperty(supabase, [property.id]);
+
+    if (mediaByProperty.error) {
+      return { data: null, error: mediaByProperty.error };
+    }
+
+    const price = property.price_from ?? 35000;
+
+    return {
+      data: {
+        id: property.id,
+        name: property.name,
+        slug: property.slug,
+        address: property.address || property.city,
+        type: property.property_type,
+        rating: Number(property.rating ?? 4.6).toFixed(1),
+        price: `${price.toLocaleString("ru-RU")} KZT`,
+        description:
+          property.description ??
+          property.short_description ??
+          "A SteppeInn property submitted by a verified owner.",
+        amenities: property.amenities,
+        photos: mediaByProperty.data.get(property.id) ?? [],
+      },
+      error: null,
+    };
+  } catch (error) {
+    return {
+      data: null,
+      error:
+        error instanceof Error
+          ? error.message
+          : "Unable to load published property.",
+    };
+  }
+}
+
 function toCatalogHotel(
   property: {
+    id: string;
     name: string;
     slug: string;
     address: string | null;
@@ -215,6 +332,7 @@ function toCatalogHotel(
     longitude: number | null;
   },
   index: number,
+  imageUrl?: string,
 ): CatalogHotel {
   const ratingValue = Number(property.rating ?? 4.6);
   const priceValue = property.price_from ?? 35000;
@@ -223,6 +341,7 @@ function toCatalogHotel(
     name: property.name,
     area: property.address || property.city,
     imageClass: publicImageClasses[index % publicImageClasses.length],
+    imageUrl,
     rating: ratingValue.toFixed(1),
     ratingValue,
     distance: "Listed on SteppeInn",
@@ -236,6 +355,62 @@ function toCatalogHotel(
     mapX: coordinateToMapPosition(property.longitude, 76.8, 77.05, 48 + index * 5),
     mapY: coordinateToMapPosition(property.latitude, 43.35, 43.15, 42 + index * 4),
   };
+}
+
+async function getPublicMediaByProperty(
+  supabase: ReturnType<typeof createServiceSupabaseClient>,
+  propertyIds: string[],
+): Promise<ServiceResult<Map<string, PropertyPhoto[]>>> {
+  if (propertyIds.length === 0) {
+    return { data: new Map(), error: null };
+  }
+
+  const { data, error } = await supabase
+    .from("property_media")
+    .select("id,property_id,url,alt_text,sort_order,is_primary")
+    .in("property_id", propertyIds)
+    .eq("media_type", "image")
+    .order("sort_order", { ascending: true });
+
+  if (error) {
+    return { data: new Map(), error: error.message };
+  }
+
+  return { data: groupPhotosByProperty(data ?? []), error: null };
+}
+
+function groupPhotosByProperty(
+  photos: {
+    id: string;
+    property_id: string | null;
+    url: string;
+    alt_text: string | null;
+    sort_order: number;
+    is_primary: boolean;
+  }[],
+) {
+  const photosByProperty = new Map<string, PropertyPhoto[]>();
+
+  photos.forEach((photo) => {
+    if (!photo.property_id) return;
+
+    const current = photosByProperty.get(photo.property_id) ?? [];
+    current.push({
+      id: photo.id,
+      propertyId: photo.property_id,
+      url: photo.url,
+      altText: photo.alt_text,
+      sortOrder: photo.sort_order,
+      isPrimary: photo.is_primary,
+    });
+    photosByProperty.set(photo.property_id, current);
+  });
+
+  return photosByProperty;
+}
+
+function pickPrimaryPhoto(photos: PropertyPhoto[]) {
+  return photos.find((photo) => photo.isPrimary) ?? photos[0];
 }
 
 function normalizePropertyType(type: string): PropertyType {
