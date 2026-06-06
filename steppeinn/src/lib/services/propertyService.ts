@@ -419,6 +419,8 @@ function toCatalogHotel(
     nearby: "All",
     mapX: coordinateToMapPosition(property.longitude, 76.8, 77.05, 48 + index * 5),
     mapY: coordinateToMapPosition(property.latitude, 43.35, 43.15, 42 + index * 4),
+    latitude: property.latitude,
+    longitude: property.longitude,
   };
 }
 
