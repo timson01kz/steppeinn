@@ -1,5 +1,6 @@
 const statusStyles: Record<string, string> = {
   active: "bg-[#dff3e7] text-[#1f6b43]",
+  available: "bg-[#dff3e7] text-[#1f6b43]",
   approved: "bg-[#dff3e7] text-[#1f6b43]",
   visible: "bg-[#dff3e7] text-[#1f6b43]",
   published: "bg-[#dff3e7] text-[#1f6b43]",
@@ -15,6 +16,7 @@ const statusStyles: Record<string, string> = {
   declined: "bg-[#f7dfdc] text-[#9b2d25]",
   expired: "bg-[#f7dfdc] text-[#9b2d25]",
   flagged: "bg-[#f7dfdc] text-[#9b2d25]",
+  unavailable: "bg-[#f7dfdc] text-[#9b2d25]",
   "needs reply": "bg-[#fff3d8] text-[#8a5a17]",
 };
 

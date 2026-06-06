@@ -17,6 +17,7 @@ export type OwnerDashboardProperty = {
   moderationNotes: string | null;
   moderationHistory: PropertyModerationEvent[];
   photos: PropertyPhoto[];
+  rooms: PropertyRoom[];
 };
 
 export type AdminModerationProperty = {
@@ -55,6 +56,21 @@ export type PublicPropertyDetail = {
   description: string;
   amenities: string[];
   photos: PropertyPhoto[];
+  rooms: PropertyRoom[];
+};
+
+export type PropertyRoom = {
+  id: string;
+  propertyId: string;
+  name: string;
+  roomType: string | null;
+  description: string | null;
+  areaM2: number | null;
+  maxGuests: number;
+  bedType: string | null;
+  quantity: number;
+  pricePerNight: number;
+  availabilityStatus: "available" | "unavailable";
 };
 
 export async function getPublishedPropertiesCount(): Promise<ServiceResult<number>> {
@@ -106,9 +122,12 @@ export async function getCurrentOwnerProperties(): Promise<
     }
 
     const propertyIds = (data ?? []).map((property) => property.id);
-    const [{ data: events, error: eventsError }, { data: photos, error: photosError }] =
-      propertyIds.length
-        ? await Promise.all([
+    const [
+      { data: events, error: eventsError },
+      { data: photos, error: photosError },
+      { data: rooms, error: roomsError },
+    ] = propertyIds.length
+      ? await Promise.all([
             supabase
               .from("property_moderation_events")
               .select("id,property_id,status,notes,created_at")
@@ -120,8 +139,16 @@ export async function getCurrentOwnerProperties(): Promise<
               .in("property_id", propertyIds)
               .eq("media_type", "image")
               .order("sort_order", { ascending: true }),
+            supabase
+              .from("rooms")
+              .select(
+                "id,property_id,name,room_type,description,area_m2,max_guests,capacity,bed_type,size_m2,quantity,price_per_night,availability_status",
+              )
+              .in("property_id", propertyIds)
+              .order("created_at", { ascending: false }),
           ])
-        : [
+      : [
+            { data: [], error: null },
             { data: [], error: null },
             { data: [], error: null },
           ];
@@ -132,6 +159,10 @@ export async function getCurrentOwnerProperties(): Promise<
 
     if (photosError) {
       return { data: [], error: photosError.message };
+    }
+
+    if (roomsError) {
+      return { data: [], error: roomsError.message };
     }
 
     const eventsByProperty = new Map<string, PropertyModerationEvent[]>();
@@ -147,6 +178,7 @@ export async function getCurrentOwnerProperties(): Promise<
     });
 
     const photosByProperty = groupPhotosByProperty(photos ?? []);
+    const roomsByProperty = groupRoomsByProperty(rooms ?? []);
 
     return {
       data: (data ?? []).map((property) => ({
@@ -160,6 +192,7 @@ export async function getCurrentOwnerProperties(): Promise<
         moderationNotes: property.moderation_notes,
         moderationHistory: eventsByProperty.get(property.id) ?? [],
         photos: photosByProperty.get(property.id) ?? [],
+        rooms: roomsByProperty.get(property.id) ?? [],
       })),
       error: null,
     };
@@ -280,10 +313,17 @@ export async function getPublishedPropertyDetail(
       return { data: null, error: null };
     }
 
-    const mediaByProperty = await getPublicMediaByProperty(supabase, [property.id]);
+    const [mediaByProperty, roomsByProperty] = await Promise.all([
+      getPublicMediaByProperty(supabase, [property.id]),
+      getPublicRoomsByProperty(supabase, [property.id]),
+    ]);
 
     if (mediaByProperty.error) {
       return { data: null, error: mediaByProperty.error };
+    }
+
+    if (roomsByProperty.error) {
+      return { data: null, error: roomsByProperty.error };
     }
 
     const price = property.price_from ?? 35000;
@@ -303,6 +343,7 @@ export async function getPublishedPropertyDetail(
           "A SteppeInn property submitted by a verified owner.",
         amenities: property.amenities,
         photos: mediaByProperty.data.get(property.id) ?? [],
+        rooms: roomsByProperty.data.get(property.id) ?? [],
       },
       error: null,
     };
@@ -315,6 +356,30 @@ export async function getPublishedPropertyDetail(
           : "Unable to load published property.",
     };
   }
+}
+
+async function getPublicRoomsByProperty(
+  supabase: ReturnType<typeof createServiceSupabaseClient>,
+  propertyIds: string[],
+): Promise<ServiceResult<Map<string, PropertyRoom[]>>> {
+  if (propertyIds.length === 0) {
+    return { data: new Map(), error: null };
+  }
+
+  const { data, error } = await supabase
+    .from("rooms")
+    .select(
+      "id,property_id,name,room_type,description,area_m2,max_guests,capacity,bed_type,size_m2,quantity,price_per_night,availability_status",
+    )
+    .in("property_id", propertyIds)
+    .eq("availability_status", "available")
+    .order("price_per_night", { ascending: true });
+
+  if (error) {
+    return { data: new Map(), error: error.message };
+  }
+
+  return { data: groupRoomsByProperty(data ?? []), error: null };
 }
 
 function toCatalogHotel(
@@ -411,6 +476,46 @@ function groupPhotosByProperty(
 
 function pickPrimaryPhoto(photos: PropertyPhoto[]) {
   return photos.find((photo) => photo.isPrimary) ?? photos[0];
+}
+
+function groupRoomsByProperty(
+  rooms: {
+    id: string;
+    property_id: string;
+    name: string;
+    room_type: string | null;
+    description: string | null;
+    area_m2: number | null;
+    max_guests: number | null;
+    capacity: number;
+    bed_type: string | null;
+    size_m2: number | null;
+    quantity: number;
+    price_per_night: number;
+    availability_status: "available" | "unavailable";
+  }[],
+) {
+  const roomsByProperty = new Map<string, PropertyRoom[]>();
+
+  rooms.forEach((room) => {
+    const current = roomsByProperty.get(room.property_id) ?? [];
+    current.push({
+      id: room.id,
+      propertyId: room.property_id,
+      name: room.name,
+      roomType: room.room_type,
+      description: room.description,
+      areaM2: room.area_m2 ?? room.size_m2,
+      maxGuests: room.max_guests ?? room.capacity,
+      bedType: room.bed_type,
+      quantity: room.quantity,
+      pricePerNight: room.price_per_night,
+      availabilityStatus: room.availability_status,
+    });
+    roomsByProperty.set(room.property_id, current);
+  });
+
+  return roomsByProperty;
 }
 
 function normalizePropertyType(type: string): PropertyType {
