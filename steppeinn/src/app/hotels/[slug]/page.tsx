@@ -6,6 +6,7 @@ import { HotelCard } from "@/components/HotelCard";
 import { SectionTitle } from "@/components/SectionTitle";
 import { hotelDetail, hotelReviews, rooms, similarHotels } from "@/data/hotels";
 import { hotelNearbyPlaces } from "@/data/locations";
+import { getPublishedPropertyDetail } from "@/lib/services/propertyService";
 
 type HotelDetailsPageProps = {
   params: Promise<{
@@ -22,10 +23,24 @@ function formatTitleFromSlug(slug: string) {
 
 export default async function HotelDetailsPage({ params }: HotelDetailsPageProps) {
   const { slug } = await params;
+  const { data: publishedProperty } = await getPublishedPropertyDetail(slug);
   const displayName =
-    slug === hotelDetail.slug
+    publishedProperty?.name ??
+    (slug === hotelDetail.slug
       ? hotelDetail.name
-      : `${formatTitleFromSlug(slug)} (Mock Hotel)`;
+      : `${formatTitleFromSlug(slug)} (Mock Hotel)`);
+  const detail = {
+    type: publishedProperty?.type ?? hotelDetail.type,
+    address: publishedProperty?.address ?? hotelDetail.address,
+    rating: publishedProperty?.rating ?? hotelDetail.rating,
+    price: publishedProperty?.price ?? hotelDetail.price,
+    description: publishedProperty?.description ?? hotelDetail.description,
+    amenities:
+      publishedProperty && publishedProperty.amenities.length > 0
+        ? publishedProperty.amenities
+        : hotelDetail.amenities,
+  };
+  const realPhotos = publishedProperty?.photos ?? [];
 
   return (
     <main className="min-h-screen bg-[#f6f3ed] pb-24 text-[#17130f] lg:pb-0">
@@ -38,28 +53,33 @@ export default async function HotelDetailsPage({ params }: HotelDetailsPageProps
         <div className="mt-6 flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
           <div>
             <p className="text-sm font-bold uppercase tracking-[0.2em] text-[#a66f2d]">
-              {hotelDetail.type}
+              {detail.type}
             </p>
             <h1 className="mt-3 text-4xl font-semibold leading-tight sm:text-6xl">
               {displayName}
             </h1>
             <p className="mt-4 max-w-3xl text-lg leading-8 text-stone-600">
-              {hotelDetail.address}
+              {detail.address}
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
             <span className="rounded-full bg-white px-4 py-2 text-sm font-bold shadow-sm">
-              Rating {hotelDetail.rating}
+              Rating {detail.rating}
             </span>
             <span className="rounded-full bg-[#2f4d46] px-4 py-2 text-sm font-bold text-white shadow-sm">
-              from {hotelDetail.price}
+              from {detail.price}
             </span>
           </div>
         </div>
       </section>
 
       <section className="mx-auto grid w-full max-w-7xl gap-3 px-5 sm:px-8 lg:grid-cols-[1.4fr_.6fr]">
-        <div className={`relative min-h-[430px] rounded-lg ${hotelDetail.gallery[0]} shadow-[0_28px_90px_rgba(34,28,18,.14)]`}>
+        <div
+          className={`relative min-h-[430px] rounded-lg ${
+            realPhotos[0] ? "bg-cover bg-center" : hotelDetail.gallery[0]
+          } shadow-[0_28px_90px_rgba(34,28,18,.14)]`}
+          style={realPhotos[0] ? { backgroundImage: `url(${realPhotos[0].url})` } : undefined}
+        >
           <div className="absolute inset-0 rounded-lg bg-[linear-gradient(180deg,rgba(0,0,0,0)_42%,rgba(0,0,0,.42)_100%)]" />
           <button className="absolute bottom-5 right-5 rounded-full bg-white px-5 py-3 text-sm font-bold text-[#17130f] shadow-lg" type="button">
             Show all photos
@@ -68,8 +88,15 @@ export default async function HotelDetailsPage({ params }: HotelDetailsPageProps
         <div className="grid grid-cols-2 gap-3">
           {hotelDetail.gallery.slice(1).map((imageClass, index) => (
             <button
-              className={`min-h-[205px] rounded-lg ${imageClass} transition hover:scale-[1.02]`}
-              key={imageClass}
+              className={`min-h-[205px] rounded-lg transition hover:scale-[1.02] ${
+                realPhotos[index + 1] ? "bg-cover bg-center" : imageClass
+              }`}
+              key={realPhotos[index + 1]?.id ?? imageClass}
+              style={
+                realPhotos[index + 1]
+                  ? { backgroundImage: `url(${realPhotos[index + 1].url})` }
+                  : undefined
+              }
               type="button"
             >
               <span className="sr-only">Gallery thumbnail {index + 1}</span>
@@ -82,12 +109,12 @@ export default async function HotelDetailsPage({ params }: HotelDetailsPageProps
         <div className="grid gap-12">
           <section className="rounded-lg border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
             <SectionTitle
-              description={hotelDetail.description}
+              description={detail.description}
               eyebrow="Hotel overview"
               title="Premium city comfort with mountain energy."
             />
             <div className="mt-8 flex flex-wrap gap-2">
-              {hotelDetail.amenities.map((amenity) => (
+              {detail.amenities.map((amenity) => (
                 <span
                   className="rounded-full border border-stone-200 bg-[#f6f3ed] px-4 py-2 text-sm font-semibold"
                   key={amenity}
@@ -241,7 +268,7 @@ export default async function HotelDetailsPage({ params }: HotelDetailsPageProps
             <p className="text-xs font-bold uppercase tracking-[0.16em] text-stone-500">
               from
             </p>
-            <p className="text-lg font-bold text-[#2f4d46]">{hotelDetail.price}</p>
+            <p className="text-lg font-bold text-[#2f4d46]">{detail.price}</p>
           </div>
           <a
             className="flex h-12 items-center justify-center rounded-md bg-[#17130f] px-6 font-bold text-white"

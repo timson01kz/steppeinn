@@ -116,6 +116,8 @@ create table property_media (
   room_id uuid,
   url text not null,
   media_type text not null,
+  alt_text text,
+  is_primary boolean not null default false,
   sort_order integer not null default 0,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
@@ -237,6 +239,9 @@ create index locations_category_idx on locations(category);
 create index locations_lat_lng_idx on locations(latitude, longitude);
 create index property_media_property_id_idx on property_media(property_id);
 create index property_media_room_id_idx on property_media(room_id);
+create unique index property_media_one_primary_per_property_idx
+  on property_media(property_id)
+  where is_primary = true and property_id is not null;
 create index property_moderation_events_property_id_idx on property_moderation_events(property_id);
 create index property_moderation_events_admin_id_idx on property_moderation_events(admin_id);
 create index property_moderation_events_status_idx on property_moderation_events(status);
@@ -360,6 +365,76 @@ create policy property_moderation_events_admin_insert
       from profiles
       where profiles.id = auth.uid()
         and profiles.role = 'admin'
+    )
+  );
+
+create policy property_media_public_published_select
+  on property_media for select
+  to anon, authenticated
+  using (
+    media_type = 'image'
+    and exists (
+      select 1
+      from properties
+      where properties.id = property_media.property_id
+        and properties.status = 'published'
+    )
+  );
+
+create policy property_media_owner_select
+  on property_media for select
+  to authenticated
+  using (
+    exists (
+      select 1
+      from properties
+      where properties.id = property_media.property_id
+        and properties.owner_id = auth.uid()
+    )
+  );
+
+create policy property_media_owner_insert
+  on property_media for insert
+  to authenticated
+  with check (
+    media_type = 'image'
+    and exists (
+      select 1
+      from properties
+      where properties.id = property_media.property_id
+        and properties.owner_id = auth.uid()
+    )
+  );
+
+create policy property_media_owner_update
+  on property_media for update
+  to authenticated
+  using (
+    exists (
+      select 1
+      from properties
+      where properties.id = property_media.property_id
+        and properties.owner_id = auth.uid()
+    )
+  )
+  with check (
+    exists (
+      select 1
+      from properties
+      where properties.id = property_media.property_id
+        and properties.owner_id = auth.uid()
+    )
+  );
+
+create policy property_media_owner_delete
+  on property_media for delete
+  to authenticated
+  using (
+    exists (
+      select 1
+      from properties
+      where properties.id = property_media.property_id
+        and properties.owner_id = auth.uid()
     )
   );
 
