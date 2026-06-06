@@ -1,6 +1,7 @@
 import { createServiceSupabaseClient } from "@/lib/supabase/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import type { Database } from "@/lib/supabase/types";
+import type { CatalogHotel, PropertyType } from "@/types";
 import type { ServiceResult } from "./types";
 
 type PropertyStatus = Database["public"]["Enums"]["property_status"];
@@ -13,6 +14,8 @@ export type OwnerDashboardProperty = {
   status: PropertyStatus;
   views: string;
   requests: number;
+  moderationNotes: string | null;
+  moderationHistory: PropertyModerationEvent[];
 };
 
 export type AdminModerationProperty = {
@@ -21,6 +24,13 @@ export type AdminModerationProperty = {
   owner: string;
   city: string;
   status: PropertyStatus;
+  date: string;
+};
+
+export type PropertyModerationEvent = {
+  id: string;
+  status: PropertyStatus;
+  notes: string | null;
   date: string;
 };
 
@@ -64,13 +74,38 @@ export async function getCurrentOwnerProperties(): Promise<
 
     const { data, error } = await supabase
       .from("properties")
-      .select("id,name,slug,status,city,address,price_from,created_at")
+      .select("id,name,slug,status,city,address,price_from,moderation_notes,created_at")
       .eq("owner_id", user.id)
       .order("created_at", { ascending: false });
 
     if (error) {
       return { data: [], error: error.message };
     }
+
+    const propertyIds = (data ?? []).map((property) => property.id);
+    const { data: events, error: eventsError } = propertyIds.length
+      ? await supabase
+          .from("property_moderation_events")
+          .select("id,property_id,status,notes,created_at")
+          .in("property_id", propertyIds)
+          .order("created_at", { ascending: false })
+      : { data: [], error: null };
+
+    if (eventsError) {
+      return { data: [], error: eventsError.message };
+    }
+
+    const eventsByProperty = new Map<string, PropertyModerationEvent[]>();
+    (events ?? []).forEach((event) => {
+      const current = eventsByProperty.get(event.property_id) ?? [];
+      current.push({
+        id: event.id,
+        status: event.status,
+        notes: event.notes,
+        date: formatModerationDate(event.created_at),
+      });
+      eventsByProperty.set(event.property_id, current);
+    });
 
     return {
       data: (data ?? []).map((property) => ({
@@ -81,6 +116,8 @@ export async function getCurrentOwnerProperties(): Promise<
         status: property.status,
         views: "0",
         requests: 0,
+        moderationNotes: property.moderation_notes,
+        moderationHistory: eventsByProperty.get(property.id) ?? [],
       })),
       error: null,
     };
@@ -103,7 +140,7 @@ export async function getPendingModerationProperties(): Promise<
     const { data, error } = await supabase
       .from("properties")
       .select("id,name,owner_id,city,status,submitted_at,created_at")
-      .eq("status", "pending")
+      .in("status", ["pending", "changes_requested"])
       .order("submitted_at", { ascending: true, nullsFirst: false });
 
     if (error) {
@@ -131,6 +168,107 @@ export async function getPendingModerationProperties(): Promise<
     };
   }
 }
+
+export async function getPublishedCatalogProperties(): Promise<
+  ServiceResult<CatalogHotel[]>
+> {
+  try {
+    const supabase = createServiceSupabaseClient();
+    const { data, error } = await supabase
+      .from("properties")
+      .select(
+        "id,name,slug,address,city,property_type,rating,price_from,amenities,latitude,longitude,created_at",
+      )
+      .eq("status", "published")
+      .order("published_at", { ascending: false, nullsFirst: false });
+
+    if (error) {
+      return { data: [], error: error.message };
+    }
+
+    return {
+      data: (data ?? []).map((property, index) => toCatalogHotel(property, index)),
+      error: null,
+    };
+  } catch (error) {
+    return {
+      data: [],
+      error:
+        error instanceof Error
+          ? error.message
+          : "Unable to load published properties.",
+    };
+  }
+}
+
+function toCatalogHotel(
+  property: {
+    name: string;
+    slug: string;
+    address: string | null;
+    city: string;
+    property_type: string;
+    rating: number | null;
+    price_from: number | null;
+    amenities: string[];
+    latitude: number | null;
+    longitude: number | null;
+  },
+  index: number,
+): CatalogHotel {
+  const ratingValue = Number(property.rating ?? 4.6);
+  const priceValue = property.price_from ?? 35000;
+
+  return {
+    name: property.name,
+    area: property.address || property.city,
+    imageClass: publicImageClasses[index % publicImageClasses.length],
+    rating: ratingValue.toFixed(1),
+    ratingValue,
+    distance: "Listed on SteppeInn",
+    distanceValue: index + 1,
+    price: `${priceValue.toLocaleString("ru-RU")} KZT`,
+    priceValue,
+    slug: property.slug,
+    type: normalizePropertyType(property.property_type),
+    amenities: property.amenities.length > 0 ? property.amenities : ["Breakfast"],
+    nearby: "All",
+    mapX: coordinateToMapPosition(property.longitude, 76.8, 77.05, 48 + index * 5),
+    mapY: coordinateToMapPosition(property.latitude, 43.35, 43.15, 42 + index * 4),
+  };
+}
+
+function normalizePropertyType(type: string): PropertyType {
+  const normalized = type.toLowerCase();
+
+  if (normalized.includes("boutique")) return "Boutique";
+  if (normalized.includes("apart")) return "Apart-hotel";
+  if (normalized.includes("resort")) return "Resort";
+  if (normalized.includes("guest")) return "Guesthouse";
+
+  return "Hotel";
+}
+
+function coordinateToMapPosition(
+  value: number | null,
+  min: number,
+  max: number,
+  fallback: number,
+) {
+  if (value === null) {
+    return `${Math.max(16, Math.min(84, fallback))}%`;
+  }
+
+  const percent = ((value - min) / (max - min)) * 100;
+  return `${Math.max(12, Math.min(88, percent)).toFixed(1)}%`;
+}
+
+const publicImageClasses = [
+  "bg-[linear-gradient(135deg,#1d403a_0%,#79a99d_44%,#e4b15f_100%)]",
+  "bg-[linear-gradient(135deg,#16334b_0%,#8eb7c1_48%,#f3e3bd_100%)]",
+  "bg-[linear-gradient(135deg,#733f33_0%,#d6a86b_52%,#f7dfb5_100%)]",
+  "bg-[linear-gradient(135deg,#314d43_0%,#bfcf9b_46%,#f0bb67_100%)]",
+];
 
 function formatModerationDate(value: string) {
   return new Intl.DateTimeFormat("en", {

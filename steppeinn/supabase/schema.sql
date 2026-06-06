@@ -1,7 +1,7 @@
 create extension if not exists "pgcrypto";
 
 create type user_role as enum ('client', 'owner', 'admin');
-create type property_status as enum ('draft', 'pending', 'published', 'rejected', 'expired');
+create type property_status as enum ('draft', 'pending', 'published', 'rejected', 'changes_requested', 'expired');
 create type booking_status as enum ('pending', 'confirmed', 'declined', 'cancelled', 'completed');
 create type location_category as enum ('attraction', 'shopping', 'transport', 'business', 'recreation');
 
@@ -121,6 +121,16 @@ create table property_media (
   updated_at timestamptz not null default now()
 );
 
+create table property_moderation_events (
+  id uuid primary key default gen_random_uuid(),
+  property_id uuid not null references properties(id) on delete cascade,
+  admin_id uuid references profiles(id) on delete set null,
+  status property_status not null,
+  notes text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
 create table rooms (
   id uuid primary key default gen_random_uuid(),
   property_id uuid not null references properties(id) on delete cascade,
@@ -227,6 +237,9 @@ create index locations_category_idx on locations(category);
 create index locations_lat_lng_idx on locations(latitude, longitude);
 create index property_media_property_id_idx on property_media(property_id);
 create index property_media_room_id_idx on property_media(room_id);
+create index property_moderation_events_property_id_idx on property_moderation_events(property_id);
+create index property_moderation_events_admin_id_idx on property_moderation_events(admin_id);
+create index property_moderation_events_status_idx on property_moderation_events(status);
 create index rooms_property_id_idx on rooms(property_id);
 create index room_media_property_id_idx on room_media(property_id);
 create index room_media_room_id_idx on room_media(room_id);
@@ -244,6 +257,7 @@ alter table cities enable row level security;
 alter table locations enable row level security;
 alter table properties enable row level security;
 alter table property_media enable row level security;
+alter table property_moderation_events enable row level security;
 alter table rooms enable row level security;
 alter table room_media enable row level security;
 alter table bookings enable row level security;
@@ -275,11 +289,73 @@ create policy properties_owner_select
   to authenticated
   using (owner_id = auth.uid());
 
+create policy properties_public_published_select
+  on properties for select
+  to anon, authenticated
+  using (status = 'published');
+
 create policy properties_admin_select
   on properties for select
   to authenticated
   using (
     exists (
+      select 1
+      from profiles
+      where profiles.id = auth.uid()
+        and profiles.role = 'admin'
+    )
+  );
+
+create policy properties_admin_update
+  on properties for update
+  to authenticated
+  using (
+    exists (
+      select 1
+      from profiles
+      where profiles.id = auth.uid()
+        and profiles.role = 'admin'
+    )
+  )
+  with check (
+    exists (
+      select 1
+      from profiles
+      where profiles.id = auth.uid()
+        and profiles.role = 'admin'
+    )
+  );
+
+create policy property_moderation_events_owner_select
+  on property_moderation_events for select
+  to authenticated
+  using (
+    exists (
+      select 1
+      from properties
+      where properties.id = property_moderation_events.property_id
+        and properties.owner_id = auth.uid()
+    )
+  );
+
+create policy property_moderation_events_admin_select
+  on property_moderation_events for select
+  to authenticated
+  using (
+    exists (
+      select 1
+      from profiles
+      where profiles.id = auth.uid()
+        and profiles.role = 'admin'
+    )
+  );
+
+create policy property_moderation_events_admin_insert
+  on property_moderation_events for insert
+  to authenticated
+  with check (
+    admin_id = auth.uid()
+    and exists (
       select 1
       from profiles
       where profiles.id = auth.uid()

@@ -10,6 +10,8 @@ import {
 } from "@/data/users";
 import { getCurrentOwnerProperties } from "@/lib/services/propertyService";
 
+export const dynamic = "force-dynamic";
+
 const sidebarItems = [
   { label: "Overview", href: "#overview" },
   { label: "My properties", href: "#properties" },
@@ -29,6 +31,8 @@ export default async function OwnerDashboardPage() {
           ...property,
           id: property.name,
           slug: slugFromName(property.name),
+          moderationNotes: null,
+          moderationHistory: [],
         }));
 
   return (
@@ -148,6 +152,28 @@ export default async function OwnerDashboardPage() {
                       {property.location} · {property.views} views ·{" "}
                       {property.requests} requests
                     </p>
+                    {property.moderationNotes ? (
+                      <p className="mt-3 rounded-md bg-white px-4 py-3 text-sm font-semibold text-stone-700">
+                        Moderation notes: {property.moderationNotes}
+                      </p>
+                    ) : null}
+                    {property.moderationHistory.length > 0 ? (
+                      <div className="mt-4 grid gap-2">
+                        <p className="text-xs font-bold uppercase tracking-[0.14em] text-stone-500">
+                          Moderation history
+                        </p>
+                        {property.moderationHistory.slice(0, 3).map((event) => (
+                          <div
+                            className="flex flex-wrap items-center gap-2 text-sm text-stone-600"
+                            key={event.id}
+                          >
+                            <StatusBadge status={event.status} />
+                            <span>{event.date}</span>
+                            {event.notes ? <span>{event.notes}</span> : null}
+                          </div>
+                        ))}
+                      </div>
+                    ) : null}
                   </div>
                   <div className="flex flex-wrap gap-2">
                     <button className="rounded-md border border-stone-300 px-4 py-2 text-sm font-bold" type="button">
