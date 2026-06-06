@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { BookingRequestForm } from "@/components/BookingRequestForm";
+import { StatusBadge } from "@/components/dashboard/DashboardPrimitives";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
 import { HotelCard } from "@/components/HotelCard";
@@ -41,6 +42,27 @@ export default async function HotelDetailsPage({ params }: HotelDetailsPageProps
         : hotelDetail.amenities,
   };
   const realPhotos = publishedProperty?.photos ?? [];
+  const displayRooms =
+    publishedProperty && publishedProperty.rooms.length > 0
+      ? publishedProperty.rooms.map((room, index) => ({
+          id: room.id,
+          name: room.name,
+          imageClass: rooms[index % rooms.length].imageClass,
+          capacity: `${room.maxGuests} guests`,
+          bed: room.bedType ?? "Bed type on request",
+          size: room.areaM2 ? `${room.areaM2} m2` : "Size on request",
+          price: `${room.pricePerNight.toLocaleString("ru-RU")} KZT`,
+          description: room.description,
+          quantity: room.quantity,
+          availabilityStatus: room.availabilityStatus,
+        }))
+      : rooms.map((room) => ({
+          id: room.name,
+          ...room,
+          description: null,
+          quantity: null,
+          availabilityStatus: "available" as const,
+        }));
 
   return (
     <main className="min-h-screen bg-[#f6f3ed] pb-24 text-[#17130f] lg:pb-0">
@@ -150,26 +172,43 @@ export default async function HotelDetailsPage({ params }: HotelDetailsPageProps
 
           <section>
             <SectionTitle
-              description="Three mock room types with practical booking details."
+              description={
+                publishedProperty && publishedProperty.rooms.length > 0
+                  ? "Real room types and pricing loaded from Supabase."
+                  : "Mock room types with practical booking details."
+              }
               eyebrow="Rooms"
               title="Choose your room."
             />
             <div className="mt-8 grid gap-5">
-              {rooms.map((room) => (
+              {displayRooms.map((room) => (
                 <article
                   className="grid overflow-hidden rounded-lg border border-stone-200 bg-white shadow-sm md:grid-cols-[260px_1fr]"
-                  key={room.name}
+                  key={room.id}
                 >
                   <div className={`min-h-64 ${room.imageClass}`} />
                   <div className="p-6">
                     <div className="flex flex-col justify-between gap-4 sm:flex-row">
                       <div>
-                        <h3 className="text-2xl font-semibold">{room.name}</h3>
+                        <div className="flex flex-wrap items-center gap-3">
+                          <h3 className="text-2xl font-semibold">{room.name}</h3>
+                          <StatusBadge status={room.availabilityStatus} />
+                        </div>
                         <div className="mt-4 grid gap-2 text-sm font-semibold text-stone-600 sm:grid-cols-3">
                           <p>{room.capacity}</p>
                           <p>{room.bed}</p>
                           <p>{room.size}</p>
                         </div>
+                        {room.description ? (
+                          <p className="mt-4 text-sm leading-6 text-stone-600">
+                            {room.description}
+                          </p>
+                        ) : null}
+                        {room.quantity ? (
+                          <p className="mt-3 text-sm font-semibold text-stone-500">
+                            {room.quantity} rooms in inventory
+                          </p>
+                        ) : null}
                       </div>
                       <p className="text-xl font-bold text-[#2f4d46]">{room.price}</p>
                     </div>

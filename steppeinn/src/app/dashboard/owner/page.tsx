@@ -33,6 +33,8 @@ export default async function OwnerDashboardPage() {
           slug: slugFromName(property.name),
           moderationNotes: null,
           moderationHistory: [],
+          photos: [],
+          rooms: [],
         }));
 
   return (

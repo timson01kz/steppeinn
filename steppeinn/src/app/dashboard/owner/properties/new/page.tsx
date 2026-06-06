@@ -58,8 +58,14 @@ export default async function NewOwnerPropertyPage({
           </div>
 
           {params.success ? (
-            <div className="mt-6 rounded-lg border border-[#b8dcc7] bg-[#e9f8ee] px-5 py-4 font-semibold text-[#1f6b43]">
-              Property submitted for moderation.
+            <div className="mt-6 flex flex-col gap-4 rounded-lg border border-[#b8dcc7] bg-[#e9f8ee] px-5 py-4 font-semibold text-[#1f6b43] sm:flex-row sm:items-center sm:justify-between">
+              <span>Property submitted for moderation.</span>
+              <Link
+                className="inline-flex rounded-md bg-[#17130f] px-4 py-2 text-sm font-bold text-white"
+                href="/dashboard/owner/properties"
+              >
+                Manage photos
+              </Link>
             </div>
           ) : null}
 
@@ -144,8 +150,10 @@ export default async function NewOwnerPropertyPage({
             <div className="rounded-lg border border-dashed border-stone-300 bg-[#fbf8f1] p-5">
               <p className="font-semibold">Photos and videos</p>
               <p className="mt-2 text-sm leading-6 text-stone-600">
-                Media upload stays mock-only for Task 13. Files will be wired
-                after storage policy and media tables are connected.
+                Photos are managed after the property is submitted. Create the
+                property first, then open My Properties to upload photos, choose
+                a primary image, reorder photos, or delete them. Video upload is
+                coming later.
               </p>
             </div>
 

@@ -137,10 +137,17 @@ create table rooms (
   id uuid primary key default gen_random_uuid(),
   property_id uuid not null references properties(id) on delete cascade,
   name text not null,
+  room_type text,
+  description text,
+  area_m2 integer,
+  max_guests integer,
   capacity integer not null,
   bed_type text,
   size_m2 integer,
+  quantity integer not null default 1,
   price_per_night integer not null,
+  availability_status text not null default 'available'
+    check (availability_status in ('available', 'unavailable')),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -246,6 +253,7 @@ create index property_moderation_events_property_id_idx on property_moderation_e
 create index property_moderation_events_admin_id_idx on property_moderation_events(admin_id);
 create index property_moderation_events_status_idx on property_moderation_events(status);
 create index rooms_property_id_idx on rooms(property_id);
+create index rooms_availability_status_idx on rooms(availability_status);
 create index room_media_property_id_idx on room_media(property_id);
 create index room_media_room_id_idx on room_media(room_id);
 create index bookings_property_id_idx on bookings(property_id);
@@ -434,6 +442,74 @@ create policy property_media_owner_delete
       select 1
       from properties
       where properties.id = property_media.property_id
+        and properties.owner_id = auth.uid()
+    )
+  );
+
+create policy rooms_public_published_select
+  on rooms for select
+  to anon, authenticated
+  using (
+    exists (
+      select 1
+      from properties
+      where properties.id = rooms.property_id
+        and properties.status = 'published'
+    )
+  );
+
+create policy rooms_owner_select
+  on rooms for select
+  to authenticated
+  using (
+    exists (
+      select 1
+      from properties
+      where properties.id = rooms.property_id
+        and properties.owner_id = auth.uid()
+    )
+  );
+
+create policy rooms_owner_insert
+  on rooms for insert
+  to authenticated
+  with check (
+    exists (
+      select 1
+      from properties
+      where properties.id = rooms.property_id
+        and properties.owner_id = auth.uid()
+    )
+  );
+
+create policy rooms_owner_update
+  on rooms for update
+  to authenticated
+  using (
+    exists (
+      select 1
+      from properties
+      where properties.id = rooms.property_id
+        and properties.owner_id = auth.uid()
+    )
+  )
+  with check (
+    exists (
+      select 1
+      from properties
+      where properties.id = rooms.property_id
+        and properties.owner_id = auth.uid()
+    )
+  );
+
+create policy rooms_owner_delete
+  on rooms for delete
+  to authenticated
+  using (
+    exists (
+      select 1
+      from properties
+      where properties.id = rooms.property_id
         and properties.owner_id = auth.uid()
     )
   );
