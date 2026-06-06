@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { I18nClientProvider } from "@/components/I18nClientProvider";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -12,5 +13,11 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return <html lang="en"><body>{children}</body></html>;
+  return (
+    <html lang="en">
+      <body>
+        <I18nClientProvider>{children}</I18nClientProvider>
+      </body>
+    </html>
+  );
 }
