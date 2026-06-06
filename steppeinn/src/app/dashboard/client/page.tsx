@@ -6,7 +6,6 @@ import {
   StatusBadge,
 } from "@/components/dashboard/DashboardPrimitives";
 import { HotelCard } from "@/components/HotelCard";
-import { clientBookings } from "@/data/bookings";
 import { favoriteHotels } from "@/data/hotels";
 import {
   clientNotifications,
@@ -14,6 +13,9 @@ import {
   clientStats,
   supportFaqs,
 } from "@/data/users";
+import { getClientBookingRequests } from "@/lib/services/bookingService";
+
+export const dynamic = "force-dynamic";
 
 const sidebarItems = [
   { label: "Overview", href: "#overview" },
@@ -24,7 +26,31 @@ const sidebarItems = [
   { label: "Support", href: "#support" },
 ];
 
-export default function ClientDashboardPage() {
+export default async function ClientDashboardPage() {
+  const { data: bookingRequests, error: bookingRequestsError } =
+    await getClientBookingRequests();
+  const dashboardStats = clientStats.map((stat) => {
+    if (stat.label === "Active bookings") {
+      return {
+        ...stat,
+        value: String(
+          bookingRequests.filter((booking) => booking.status === "confirmed").length,
+        ),
+      };
+    }
+
+    if (stat.label === "Pending requests") {
+      return {
+        ...stat,
+        value: String(
+          bookingRequests.filter((booking) => booking.status === "pending").length,
+        ),
+      };
+    }
+
+    return stat;
+  });
+
   return (
     <main className="min-h-screen bg-[#f6f3ed] text-[#17130f]">
       <div className="border-b border-stone-200 bg-white">
@@ -65,8 +91,8 @@ export default function ClientDashboardPage() {
           <div className="mt-6 rounded-lg bg-[#17130f] p-4 text-white">
             <p className="text-sm font-bold">Mock account</p>
             <p className="mt-2 text-sm leading-6 text-white/62">
-              Booking data, favorites, profile, and support messages are local
-              mock content only.
+              Booking requests are loaded from Supabase. Favorites, profile, and
+              support messages are local mock content.
             </p>
           </div>
         </aside>
@@ -87,7 +113,7 @@ export default function ClientDashboardPage() {
               support messages in one client workspace.
             </p>
             <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-              {clientStats.map((stat) => (
+              {dashboardStats.map((stat) => (
                 <article className="rounded-lg border border-white/12 bg-white/10 p-5" key={stat.label}>
                   <p className="text-sm font-semibold text-white/62">{stat.label}</p>
                   <p className="mt-3 text-3xl font-semibold">{stat.value}</p>
@@ -98,17 +124,22 @@ export default function ClientDashboardPage() {
 
           <section className="rounded-lg border border-stone-200 bg-white p-6 shadow-sm sm:p-8" id="bookings">
             <SectionHeader eyebrow="My bookings" title="Requests and stays" />
+            {bookingRequestsError ? (
+              <div className="mt-6 rounded-lg border border-[#efc4bd] bg-[#fff0ed] px-5 py-4 text-sm font-semibold text-[#9b2d25]">
+                Supabase booking requests could not be loaded: {bookingRequestsError}
+              </div>
+            ) : null}
             <div className="mt-6 grid gap-4">
-              {clientBookings.map((booking) => (
+              {bookingRequests.map((booking) => (
                 <article
                   className="grid gap-4 rounded-lg border border-stone-200 bg-[#fbf8f1] p-5 xl:grid-cols-[1fr_auto] xl:items-center"
-                  key={`${booking.hotel}-${booking.dates}`}
+                  key={booking.id}
                 >
                   <div className="grid gap-3 md:grid-cols-5">
-                    <DashboardField label="Hotel" value={booking.hotel} />
+                    <DashboardField label="Hotel" value={booking.propertyName} />
                     <DashboardField label="Dates" value={booking.dates} />
                     <DashboardField label="Guests" value={booking.guests} />
-                    <DashboardField label="Room" value={booking.room} />
+                    <DashboardField label="Room" value={booking.roomName} />
                     <div>
                       <FieldLabel label="Status" />
                       <div className="mt-1">
@@ -116,23 +147,30 @@ export default function ClientDashboardPage() {
                       </div>
                     </div>
                   </div>
-                  <div className="flex flex-wrap gap-2">
-                    {["View details", "Cancel request", "Contact hotel"].map((action) => (
-                      <button
-                        className={`rounded-md px-4 py-2 text-sm font-bold ${
-                          action === "View details"
-                            ? "bg-[#2f4d46] text-white"
-                            : "border border-stone-300 bg-white"
-                        }`}
-                        key={action}
-                        type="button"
-                      >
-                        {action}
-                      </button>
-                    ))}
+                  <div className="grid gap-2">
+                    {booking.responseMessage ? (
+                      <p className="rounded-md bg-white px-4 py-3 text-sm font-semibold text-stone-700">
+                        Hotel response: {booking.responseMessage}
+                      </p>
+                    ) : (
+                      <p className="rounded-md bg-white px-4 py-3 text-sm font-semibold text-stone-600">
+                        Awaiting hotel response.
+                      </p>
+                    )}
+                    {booking.specialRequests ? (
+                      <p className="text-sm text-stone-600">
+                        Request: {booking.specialRequests}
+                      </p>
+                    ) : null}
                   </div>
                 </article>
               ))}
+              {bookingRequests.length === 0 ? (
+                <p className="rounded-lg border border-dashed border-stone-300 bg-[#fbf8f1] p-5 text-sm font-semibold text-stone-600">
+                  No Supabase booking requests yet. Send a request from a
+                  published hotel page.
+                </p>
+              ) : null}
             </div>
           </section>
 

@@ -206,6 +206,7 @@ export type Database = {
           check_out: string;
           guests: number;
           comment: string | null;
+          special_requests: string | null;
           status: Database["public"]["Enums"]["booking_status"];
           response_message: string | null;
           responded_at: string | null;
@@ -225,6 +226,7 @@ export type Database = {
           check_out: string;
           guests: number;
           comment?: string | null;
+          special_requests?: string | null;
           status?: Database["public"]["Enums"]["booking_status"];
           response_message?: string | null;
           responded_at?: string | null;

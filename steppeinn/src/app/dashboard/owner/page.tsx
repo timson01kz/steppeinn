@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { StatusBadge } from "@/components/dashboard/DashboardPrimitives";
-import { ownerBookingRequests } from "@/data/bookings";
 import { ownerBillingPlans } from "@/data/tariffs";
 import {
   addPropertySteps,
@@ -8,6 +7,8 @@ import {
   ownerProperties,
   ownerTopLocations,
 } from "@/data/users";
+import { respondToBookingRequestAction } from "@/lib/actions/bookingActions";
+import { getOwnerBookingRequests } from "@/lib/services/bookingService";
 import { getCurrentOwnerProperties } from "@/lib/services/propertyService";
 
 export const dynamic = "force-dynamic";
@@ -21,9 +22,16 @@ const sidebarItems = [
   { label: "Statistics", href: "#statistics" },
 ];
 
-export default async function OwnerDashboardPage() {
+export default async function OwnerDashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ booking_error?: string; booking_success?: string }>;
+}) {
+  const params = await searchParams;
   const { data: supabaseProperties, error: propertiesError } =
     await getCurrentOwnerProperties();
+  const { data: bookingRequests, error: bookingRequestsError } =
+    await getOwnerBookingRequests();
   const displayedProperties =
     supabaseProperties.length > 0
       ? supabaseProperties
@@ -230,18 +238,28 @@ export default async function OwnerDashboardPage() {
               Booking requests
             </p>
             <h2 className="mt-2 text-3xl font-semibold">Guest inquiries</h2>
+            {params.booking_success ? (
+              <div className="mt-6 rounded-lg border border-[#b8dcc7] bg-[#e9f8ee] px-5 py-4 text-sm font-semibold text-[#1f6b43]">
+                Booking response saved.
+              </div>
+            ) : null}
+            {params.booking_error || bookingRequestsError ? (
+              <div className="mt-6 rounded-lg border border-[#efc4bd] bg-[#fff0ed] px-5 py-4 text-sm font-semibold text-[#9b2d25]">
+                {params.booking_error ?? bookingRequestsError}
+              </div>
+            ) : null}
             <div className="mt-6 grid gap-4">
-              {ownerBookingRequests.map((request) => (
+              {bookingRequests.map((request) => (
                 <article
                   className="grid gap-4 rounded-lg border border-stone-200 bg-[#fbf8f1] p-5 xl:grid-cols-[1fr_auto] xl:items-center"
-                  key={`${request.guest}-${request.dates}`}
+                  key={request.id}
                 >
                   <div className="grid gap-3 md:grid-cols-5">
                     <div>
                       <p className="text-xs font-bold uppercase tracking-[0.14em] text-stone-500">
                         Guest
                       </p>
-                      <p className="mt-1 font-semibold">{request.guest}</p>
+                      <p className="mt-1 font-semibold">{request.guestName}</p>
                     </div>
                     <div>
                       <p className="text-xs font-bold uppercase tracking-[0.14em] text-stone-500">
@@ -259,7 +277,7 @@ export default async function OwnerDashboardPage() {
                       <p className="text-xs font-bold uppercase tracking-[0.14em] text-stone-500">
                         Room
                       </p>
-                      <p className="mt-1 font-semibold">{request.room}</p>
+                      <p className="mt-1 font-semibold">{request.roomName}</p>
                     </div>
                     <div>
                       <p className="text-xs font-bold uppercase tracking-[0.14em] text-stone-500">
@@ -270,23 +288,40 @@ export default async function OwnerDashboardPage() {
                       </div>
                     </div>
                   </div>
-                  <div className="flex flex-wrap gap-2">
-                    {["Confirm", "Decline", "Message"].map((action) => (
+                  <form action={respondToBookingRequestAction} className="grid gap-3">
+                    <input name="booking_id" type="hidden" value={request.id} />
+                    <textarea
+                      className="min-h-20 rounded-md border border-stone-300 bg-white px-3 py-2 text-sm font-semibold outline-none focus:border-[#2f4d46]"
+                      defaultValue={request.responseMessage ?? ""}
+                      name="response_message"
+                      placeholder="Response message for the guest"
+                    />
+                    <div className="flex flex-wrap gap-2">
                       <button
-                        className={`rounded-md px-4 py-2 text-sm font-bold ${
-                          action === "Confirm"
-                            ? "bg-[#2f4d46] text-white"
-                            : "border border-stone-300 bg-white"
-                        }`}
-                        key={action}
-                        type="button"
+                        className="rounded-md bg-[#2f4d46] px-4 py-2 text-sm font-bold text-white"
+                        name="action"
+                        type="submit"
+                        value="confirm"
                       >
-                        {action}
+                        Confirm
                       </button>
-                    ))}
-                  </div>
+                      <button
+                        className="rounded-md border border-stone-300 bg-white px-4 py-2 text-sm font-bold"
+                        name="action"
+                        type="submit"
+                        value="decline"
+                      >
+                        Decline
+                      </button>
+                    </div>
+                  </form>
                 </article>
               ))}
+              {bookingRequests.length === 0 ? (
+                <p className="rounded-lg border border-dashed border-stone-300 bg-[#fbf8f1] p-5 text-sm font-semibold text-stone-600">
+                  No Supabase booking requests yet.
+                </p>
+              ) : null}
             </div>
           </section>
 

@@ -179,6 +179,7 @@ create table bookings (
   check_out date not null,
   guests integer not null default 1,
   comment text,
+  special_requests text,
   status booking_status not null default 'pending',
   response_message text,
   responded_at timestamptz,
@@ -260,6 +261,7 @@ create index bookings_property_id_idx on bookings(property_id);
 create index bookings_client_id_idx on bookings(client_id);
 create index bookings_room_id_idx on bookings(room_id);
 create index bookings_status_idx on bookings(status);
+create index bookings_created_at_idx on bookings(created_at);
 create index favorites_client_id_idx on favorites(client_id);
 create index favorites_property_id_idx on favorites(property_id);
 create index reviews_property_id_idx on reviews(property_id);
@@ -511,6 +513,60 @@ create policy rooms_owner_delete
       from properties
       where properties.id = rooms.property_id
         and properties.owner_id = auth.uid()
+    )
+  );
+
+create policy bookings_client_insert
+  on bookings for insert
+  to authenticated
+  with check (client_id = auth.uid());
+
+create policy bookings_client_select
+  on bookings for select
+  to authenticated
+  using (client_id = auth.uid());
+
+create policy bookings_owner_select
+  on bookings for select
+  to authenticated
+  using (
+    exists (
+      select 1
+      from properties
+      where properties.id = bookings.property_id
+        and properties.owner_id = auth.uid()
+    )
+  );
+
+create policy bookings_owner_update
+  on bookings for update
+  to authenticated
+  using (
+    exists (
+      select 1
+      from properties
+      where properties.id = bookings.property_id
+        and properties.owner_id = auth.uid()
+    )
+  )
+  with check (
+    exists (
+      select 1
+      from properties
+      where properties.id = bookings.property_id
+        and properties.owner_id = auth.uid()
+    )
+  );
+
+create policy bookings_admin_select
+  on bookings for select
+  to authenticated
+  using (
+    exists (
+      select 1
+      from profiles
+      where profiles.id = auth.uid()
+        and profiles.role = 'admin'
     )
   );
 
