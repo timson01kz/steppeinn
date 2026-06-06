@@ -85,6 +85,7 @@ create table properties (
   location_id uuid references locations(id) on delete set null,
   name text not null,
   slug text not null unique,
+  short_description text,
   description text,
   -- Translation-ready fields for future RU/KZ/EN property descriptions.
   description_en text,
@@ -250,6 +251,41 @@ alter table favorites enable row level security;
 alter table reviews enable row level security;
 alter table advertisements enable row level security;
 alter table tariffs enable row level security;
+
+create policy profiles_select_own
+  on profiles for select
+  to authenticated
+  using (id = auth.uid());
+
+create policy properties_owner_insert
+  on properties for insert
+  to authenticated
+  with check (
+    owner_id = auth.uid()
+    and exists (
+      select 1
+      from profiles
+      where profiles.id = auth.uid()
+        and profiles.role in ('owner', 'admin')
+    )
+  );
+
+create policy properties_owner_select
+  on properties for select
+  to authenticated
+  using (owner_id = auth.uid());
+
+create policy properties_admin_select
+  on properties for select
+  to authenticated
+  using (
+    exists (
+      select 1
+      from profiles
+      where profiles.id = auth.uid()
+        and profiles.role = 'admin'
+    )
+  );
 
 -- Distance-based search preparation using the Haversine formula.
 -- This avoids requiring PostGIS for MVP setup. If search becomes core, replace

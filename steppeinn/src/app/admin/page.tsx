@@ -17,6 +17,7 @@ import {
   adminUsers,
   adminViewedHotels,
 } from "@/data/users";
+import { getPendingModerationProperties } from "@/lib/services/propertyService";
 
 const navItems = [
   "Dashboard",
@@ -30,7 +31,12 @@ const navItems = [
   "Settings",
 ];
 
-export default function AdminPage() {
+export default async function AdminPage() {
+  const { data: pendingProperties, error: pendingPropertiesError } =
+    await getPendingModerationProperties();
+  const displayedProperties =
+    pendingProperties.length > 0 ? pendingProperties : adminProperties;
+
   return (
     <main className="min-h-screen bg-[#f6f3ed] text-[#17130f]">
       <div className="border-b border-stone-200 bg-white">
@@ -77,7 +83,8 @@ export default function AdminPage() {
             </h1>
             <p className="mt-4 max-w-3xl leading-7 text-white/68">
               Moderate listings, manage users, configure locations, review
-              ads, and monitor SteppeInn performance from a single mock admin.
+              ads, and monitor SteppeInn performance from a single admin
+              workspace.
             </p>
             <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               {adminMetrics.map((metric) => (
@@ -91,8 +98,13 @@ export default function AdminPage() {
 
           <section className="rounded-lg border border-stone-200 bg-white p-6 shadow-sm sm:p-8" id="properties">
             <SectionHeader eyebrow="Moderation" title="Property queue" />
+            {pendingPropertiesError ? (
+              <div className="mt-6 rounded-lg border border-[#efc4bd] bg-[#fff0ed] px-5 py-4 text-sm font-semibold text-[#9b2d25]">
+                Supabase moderation queue could not be loaded: {pendingPropertiesError}
+              </div>
+            ) : null}
             <div className="mt-6 grid gap-4">
-              {adminProperties.map((property) => (
+              {displayedProperties.map((property) => (
                 <article className="grid gap-4 rounded-lg border border-stone-200 bg-[#fbf8f1] p-5 xl:grid-cols-[1fr_auto] xl:items-center" key={property.name}>
                   <div className="grid gap-3 md:grid-cols-5">
                     <DashboardField label="Property" value={property.name} />

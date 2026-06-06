@@ -59,6 +59,7 @@ export type Database = {
           location_id: string | null;
           name: string;
           slug: string;
+          short_description: string | null;
           description: string | null;
           description_en: string | null;
           description_ru: string | null;
@@ -92,6 +93,7 @@ export type Database = {
           location_id?: string | null;
           name: string;
           slug: string;
+          short_description?: string | null;
           description?: string | null;
           description_en?: string | null;
           description_ru?: string | null;

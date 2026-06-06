@@ -8,17 +8,29 @@ import {
   ownerProperties,
   ownerTopLocations,
 } from "@/data/users";
+import { getCurrentOwnerProperties } from "@/lib/services/propertyService";
 
 const sidebarItems = [
   { label: "Overview", href: "#overview" },
   { label: "My properties", href: "#properties" },
-  { label: "Add property", href: "#add-property" },
+  { label: "Add property", href: "/dashboard/owner/properties/new" },
   { label: "Requests", href: "#requests" },
   { label: "Billing", href: "#billing" },
   { label: "Statistics", href: "#statistics" },
 ];
 
-export default function OwnerDashboardPage() {
+export default async function OwnerDashboardPage() {
+  const { data: supabaseProperties, error: propertiesError } =
+    await getCurrentOwnerProperties();
+  const displayedProperties =
+    supabaseProperties.length > 0
+      ? supabaseProperties
+      : ownerProperties.map((property) => ({
+          ...property,
+          id: property.name,
+          slug: slugFromName(property.name),
+        }));
+
   return (
     <main className="min-h-screen bg-[#f6f3ed] text-[#17130f]">
       <div className="border-b border-stone-200 bg-white">
@@ -59,8 +71,8 @@ export default function OwnerDashboardPage() {
           <div className="mt-6 rounded-lg bg-[#17130f] p-4 text-white">
             <p className="text-sm font-bold">Mock mode</p>
             <p className="mt-2 text-sm leading-6 text-white/62">
-              No database or Supabase connection yet. All dashboard data is
-              local mock content.
+              Supabase now powers owner-submitted listings. Remaining dashboard
+              modules still use local mock content.
             </p>
           </div>
         </aside>
@@ -83,12 +95,12 @@ export default function OwnerDashboardPage() {
                   listing setup from one owner workspace.
                 </p>
               </div>
-              <a
+              <Link
                 className="inline-flex rounded-md bg-white px-5 py-3 font-bold text-[#17130f]"
-                href="#add-property"
+                href="/dashboard/owner/properties/new"
               >
                 Add property
-              </a>
+              </Link>
             </div>
             <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
               {ownerMetrics.map((metric) => (
@@ -112,12 +124,17 @@ export default function OwnerDashboardPage() {
                 </p>
                 <h2 className="mt-2 text-3xl font-semibold">Listings</h2>
               </div>
-              <a className="font-bold text-[#2f4d46]" href="#add-property">
+              <Link className="font-bold text-[#2f4d46]" href="/dashboard/owner/properties/new">
                 Create new listing
-              </a>
+              </Link>
             </div>
+            {propertiesError ? (
+              <div className="mt-6 rounded-lg border border-[#efc4bd] bg-[#fff0ed] px-5 py-4 text-sm font-semibold text-[#9b2d25]">
+                Supabase properties could not be loaded: {propertiesError}
+              </div>
+            ) : null}
             <div className="mt-6 grid gap-4">
-              {ownerProperties.map((property) => (
+              {displayedProperties.map((property) => (
                 <article
                   className="grid gap-4 rounded-lg border border-stone-200 bg-[#fbf8f1] p-5 md:grid-cols-[1fr_auto] md:items-center"
                   key={property.name}
@@ -138,7 +155,7 @@ export default function OwnerDashboardPage() {
                     </button>
                     <Link
                       className="rounded-md bg-[#17130f] px-4 py-2 text-sm font-bold text-white"
-                      href="/hotels/kok-tobe-skyline-residence"
+                      href={`/hotels/${property.slug ?? "kok-tobe-skyline-residence"}`}
                     >
                       Preview
                     </Link>
@@ -169,12 +186,12 @@ export default function OwnerDashboardPage() {
                 </article>
               ))}
             </div>
-            <button
-              className="mt-6 rounded-md bg-[#17130f] px-5 py-3 font-bold text-white"
-              type="button"
+            <Link
+              className="mt-6 inline-flex rounded-md bg-[#17130f] px-5 py-3 font-bold text-white"
+              href="/dashboard/owner/properties/new"
             >
               Submit for moderation
-            </button>
+            </Link>
           </section>
 
           <section className="rounded-lg border border-stone-200 bg-white p-6 shadow-sm sm:p-8" id="requests">
@@ -304,4 +321,11 @@ export default function OwnerDashboardPage() {
       </div>
     </main>
   );
+}
+
+function slugFromName(name: string) {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
 }
