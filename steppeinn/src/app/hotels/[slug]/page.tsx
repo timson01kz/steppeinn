@@ -13,6 +13,10 @@ type HotelDetailsPageProps = {
   params: Promise<{
     slug: string;
   }>;
+  searchParams: Promise<{
+    booking_error?: string;
+    booking_success?: string;
+  }>;
 };
 
 function formatTitleFromSlug(slug: string) {
@@ -22,8 +26,12 @@ function formatTitleFromSlug(slug: string) {
     .join(" ");
 }
 
-export default async function HotelDetailsPage({ params }: HotelDetailsPageProps) {
+export default async function HotelDetailsPage({
+  params,
+  searchParams,
+}: HotelDetailsPageProps) {
   const { slug } = await params;
+  const query = await searchParams;
   const { data: publishedProperty } = await getPublishedPropertyDetail(slug);
   const displayName =
     publishedProperty?.name ??
@@ -42,6 +50,12 @@ export default async function HotelDetailsPage({ params }: HotelDetailsPageProps
         : hotelDetail.amenities,
   };
   const realPhotos = publishedProperty?.photos ?? [];
+  const bookingRooms =
+    publishedProperty?.rooms.map((room) => ({
+      id: room.id,
+      name: room.name,
+      price: `${room.pricePerNight.toLocaleString("ru-RU")} KZT`,
+    })) ?? [];
   const displayRooms =
     publishedProperty && publishedProperty.rooms.length > 0
       ? publishedProperty.rooms.map((room, index) => ({
@@ -296,7 +310,13 @@ export default async function HotelDetailsPage({ params }: HotelDetailsPageProps
 
         <aside className="hidden lg:block">
           <div className="sticky top-6 rounded-lg border border-stone-200 bg-white p-6 shadow-[0_24px_80px_rgba(34,28,18,.14)]">
-            <BookingRequestForm />
+            <BookingRequestForm
+              bookingError={query.booking_error}
+              bookingSuccess={query.booking_success === "1"}
+              propertyId={publishedProperty?.id}
+              returnPath={`/hotels/${slug}`}
+              rooms={bookingRooms}
+            />
           </div>
         </aside>
       </section>
