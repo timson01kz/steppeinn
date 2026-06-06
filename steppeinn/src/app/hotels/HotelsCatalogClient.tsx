@@ -1,13 +1,14 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
 import { HotelCard } from "@/components/HotelCard";
+import { TwoGisMap } from "@/components/maps/TwoGisMap";
 import { SectionTitle } from "@/components/SectionTitle";
-import { amenityOptions, catalogHotels, propertyTypes } from "@/data/hotels";
+import { amenityOptions, propertyTypes } from "@/data/hotels";
 import { nearbyPlaceOptions } from "@/data/locations";
-import type { CatalogHotel, SortMode, ViewMode } from "@/types";
+import type { CatalogHotel, LocationCardData, SortMode, ViewMode } from "@/types";
 
 function toggleFilter(value: string, selected: string[]) {
   return selected.includes(value)
@@ -16,16 +17,15 @@ function toggleFilter(value: string, selected: string[]) {
 }
 
 export function HotelsCatalogClient({
+  locations,
   publishedHotels,
   supabaseError,
 }: {
+  locations: LocationCardData[];
   publishedHotels: CatalogHotel[];
   supabaseError: string | null;
 }) {
-  const hotels = useMemo(
-    () => [...publishedHotels, ...catalogHotels],
-    [publishedHotels],
-  );
+  const hotels = useMemo(() => publishedHotels, [publishedHotels]);
   const [search, setSearch] = useState("");
   const [maxPrice, setMaxPrice] = useState(70000);
   const [types, setTypes] = useState<string[]>([]);
@@ -68,6 +68,7 @@ export function HotelsCatalogClient({
 
   const activeHotelData =
     filteredHotels.find((hotel) => hotel.slug === activeHotel) ?? filteredHotels[0];
+  const handlePropertySelect = useCallback((slug: string) => setActiveHotel(slug), []);
 
   return (
     <main className="min-h-screen bg-[#f6f3ed] text-[#17130f]">
@@ -237,7 +238,7 @@ export function HotelsCatalogClient({
             <p className="text-sm font-semibold text-stone-500">
               {publishedHotels.length > 0
                 ? `${publishedHotels.length} approved Supabase listings included.`
-                : "Showing local mock listings until properties are approved."}
+                : "No approved Supabase listings yet."}
             </p>
           </div>
           {supabaseError ? (
@@ -254,26 +255,13 @@ export function HotelsCatalogClient({
             </div>
           ) : (
             <div className="grid gap-5 xl:grid-cols-[1fr_320px]">
-              <div className="relative min-h-[620px] overflow-hidden rounded-lg border border-stone-200 bg-[#dde8df] shadow-[0_28px_90px_rgba(34,28,18,.12)]">
-                <div className="absolute inset-0 city-map-grid" />
-                <div className="absolute left-[18%] top-[30%] h-2 w-[68%] rotate-[24deg] rounded-full bg-white/70" />
-                <div className="absolute left-[22%] top-[58%] h-2 w-[62%] -rotate-[11deg] rounded-full bg-white/70" />
-                <div className="absolute left-[44%] top-[12%] h-[76%] w-2 rotate-[7deg] rounded-full bg-white/70" />
-                {filteredHotels.map((hotel) => (
-                  <button
-                    className={`absolute -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white shadow-[0_0_0_9px_rgba(240,187,103,.22)] transition hover:scale-110 ${
-                      activeHotel === hotel.slug
-                        ? "h-7 w-7 bg-[#f0bb67]"
-                        : "h-5 w-5 bg-[#2f4d46]"
-                    }`}
-                    key={hotel.slug}
-                    onClick={() => setActiveHotel(hotel.slug)}
-                    style={{ left: hotel.mapX, top: hotel.mapY }}
-                    title={hotel.name}
-                    type="button"
-                  />
-                ))}
-              </div>
+              <TwoGisMap
+                activeSlug={activeHotelData?.slug}
+                className="min-h-[620px] shadow-[0_28px_90px_rgba(34,28,18,.12)]"
+                locations={locations}
+                onPropertySelect={handlePropertySelect}
+                properties={filteredHotels}
+              />
               <div className="rounded-lg border border-stone-200 bg-white p-5 shadow-sm">
                 {activeHotelData ? (
                   <HotelCard hotel={activeHotelData} />

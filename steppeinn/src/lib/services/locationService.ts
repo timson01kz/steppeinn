@@ -24,7 +24,7 @@ export async function getAlmatyLocations(): Promise<
     const supabase = createServiceSupabaseClient();
     const { data, error } = await supabase
       .from("locations")
-      .select("name, category, description, description_en")
+      .select("name, category, description, description_en, latitude, longitude")
       .eq("is_active", true)
       .order("name", { ascending: true });
 
@@ -45,6 +45,8 @@ export async function getAlmatyLocations(): Promise<
             location.description_en ??
             location.description ??
             "SteppeInn location from Supabase.",
+          latitude: location.latitude,
+          longitude: location.longitude,
         };
       }),
       error: null,
