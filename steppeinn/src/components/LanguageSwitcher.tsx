@@ -1,6 +1,6 @@
 "use client";
 
-const languages = ["RU", "KZ", "EN"];
+import { localeLabels, supportedLocales, useI18n } from "@/i18n";
 
 type LanguageSwitcherProps = {
   variant?: "light" | "dark";
@@ -8,6 +8,7 @@ type LanguageSwitcherProps = {
 
 export function LanguageSwitcher({ variant = "light" }: LanguageSwitcherProps) {
   const isLight = variant === "light";
+  const { locale, setLocale } = useI18n();
 
   return (
     <div
@@ -17,10 +18,10 @@ export function LanguageSwitcher({ variant = "light" }: LanguageSwitcherProps) {
           : "border border-stone-200 bg-white text-[#17130f]"
       }`}
     >
-      {languages.map((lang) => (
+      {supportedLocales.map((lang) => (
         <button
           className={`rounded-full px-3 py-1.5 transition ${
-            lang === "RU"
+            lang === locale
               ? isLight
                 ? "bg-white text-[#1d403a]"
                 : "bg-[#17130f] text-white"
@@ -29,9 +30,10 @@ export function LanguageSwitcher({ variant = "light" }: LanguageSwitcherProps) {
                 : "hover:bg-stone-100"
           }`}
           key={lang}
+          onClick={() => setLocale(lang)}
           type="button"
         >
-          {lang}
+          {localeLabels[lang]}
         </button>
       ))}
     </div>
