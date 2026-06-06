@@ -10,7 +10,13 @@ export type Database = {
   public: {
     Enums: {
       user_role: "client" | "owner" | "admin";
-      property_status: "draft" | "pending" | "published" | "rejected" | "expired";
+      property_status:
+        | "draft"
+        | "pending"
+        | "published"
+        | "rejected"
+        | "changes_requested"
+        | "expired";
       booking_status:
         | "pending"
         | "confirmed"
@@ -124,6 +130,30 @@ export type Database = {
         Relationships: [];
       };
       property_media: GenericMediaTable;
+      property_moderation_events: {
+        Row: {
+          id: string;
+          property_id: string;
+          admin_id: string | null;
+          status: Database["public"]["Enums"]["property_status"];
+          notes: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          property_id: string;
+          admin_id?: string | null;
+          status: Database["public"]["Enums"]["property_status"];
+          notes?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["property_moderation_events"]["Insert"]
+        >;
+        Relationships: [];
+      };
       rooms: {
         Row: {
           id: string;

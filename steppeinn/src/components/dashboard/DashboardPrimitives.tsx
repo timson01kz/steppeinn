@@ -6,6 +6,7 @@ const statusStyles: Record<string, string> = {
   new: "bg-[#dff3e7] text-[#1f6b43]",
   pending: "bg-[#fff3d8] text-[#8a5a17]",
   changes: "bg-[#e3edf8] text-[#244d7a]",
+  changes_requested: "bg-[#e3edf8] text-[#244d7a]",
   confirmed: "bg-[#e3edf8] text-[#244d7a]",
   completed: "bg-[#e3edf8] text-[#244d7a]",
   draft: "bg-stone-100 text-stone-700",

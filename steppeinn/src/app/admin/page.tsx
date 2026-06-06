@@ -17,6 +17,7 @@ import {
   adminUsers,
   adminViewedHotels,
 } from "@/data/users";
+import { moderatePropertyAction } from "@/lib/actions/propertyActions";
 import { getPendingModerationProperties } from "@/lib/services/propertyService";
 
 const navItems = [
@@ -31,11 +32,21 @@ const navItems = [
   "Settings",
 ];
 
-export default async function AdminPage() {
+export default async function AdminPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ moderation_error?: string; moderation_success?: string }>;
+}) {
+  const params = await searchParams;
   const { data: pendingProperties, error: pendingPropertiesError } =
     await getPendingModerationProperties();
   const displayedProperties =
-    pendingProperties.length > 0 ? pendingProperties : adminProperties;
+    pendingProperties.length > 0
+      ? pendingProperties
+      : adminProperties.map((property) => ({
+          ...property,
+          id: property.name,
+        }));
 
   return (
     <main className="min-h-screen bg-[#f6f3ed] text-[#17130f]">
@@ -98,6 +109,16 @@ export default async function AdminPage() {
 
           <section className="rounded-lg border border-stone-200 bg-white p-6 shadow-sm sm:p-8" id="properties">
             <SectionHeader eyebrow="Moderation" title="Property queue" />
+            {params.moderation_success ? (
+              <div className="mt-6 rounded-lg border border-[#b8dcc7] bg-[#e9f8ee] px-5 py-4 text-sm font-semibold text-[#1f6b43]">
+                Moderation status saved in Supabase.
+              </div>
+            ) : null}
+            {params.moderation_error ? (
+              <div className="mt-6 rounded-lg border border-[#efc4bd] bg-[#fff0ed] px-5 py-4 text-sm font-semibold text-[#9b2d25]">
+                {params.moderation_error}
+              </div>
+            ) : null}
             {pendingPropertiesError ? (
               <div className="mt-6 rounded-lg border border-[#efc4bd] bg-[#fff0ed] px-5 py-4 text-sm font-semibold text-[#9b2d25]">
                 Supabase moderation queue could not be loaded: {pendingPropertiesError}
@@ -116,19 +137,33 @@ export default async function AdminPage() {
                     </div>
                     <DashboardField label="Submitted" value={property.date} />
                   </div>
-                  <div className="flex flex-wrap gap-2">
-                    {["Approve", "Reject", "Request changes"].map((action) => (
-                      <button
-                        className={`rounded-md px-4 py-2 text-sm font-bold ${
-                          action === "Approve" ? "bg-[#2f4d46] text-white" : "border border-stone-300 bg-white"
-                        }`}
-                        key={action}
-                        type="button"
-                      >
-                        {action}
-                      </button>
-                    ))}
-                  </div>
+                  <form action={moderatePropertyAction} className="grid gap-3">
+                    <input name="property_id" type="hidden" value={property.id} />
+                    <textarea
+                      className="min-h-20 rounded-md border border-stone-300 bg-white px-3 py-2 text-sm font-semibold outline-none focus:border-[#2f4d46]"
+                      name="notes"
+                      placeholder="Moderation notes for the owner"
+                    />
+                    <div className="flex flex-wrap gap-2">
+                      {[
+                        { label: "Approve", value: "approve" },
+                        { label: "Reject", value: "reject" },
+                        { label: "Request changes", value: "request_changes" },
+                      ].map((action) => (
+                        <button
+                          className={`rounded-md px-4 py-2 text-sm font-bold ${
+                            action.value === "approve" ? "bg-[#2f4d46] text-white" : "border border-stone-300 bg-white"
+                          }`}
+                          key={action.value}
+                          name="action"
+                          type="submit"
+                          value={action.value}
+                        >
+                          {action.label}
+                        </button>
+                      ))}
+                    </div>
+                  </form>
                 </article>
               ))}
             </div>
