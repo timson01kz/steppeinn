@@ -5,7 +5,7 @@ import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
 import { HotelCard } from "@/components/HotelCard";
 import { SectionTitle } from "@/components/SectionTitle";
-import { amenityOptions, propertyTypes } from "@/data/hotels";
+import { amenityOptions, catalogHotels, propertyTypes } from "@/data/hotels";
 import { nearbyPlaceOptions } from "@/data/locations";
 import type { CatalogHotel, SortMode, ViewMode } from "@/types";
 
@@ -24,7 +24,11 @@ export function HotelsCatalogClient({
   publishedHotels: CatalogHotel[];
   supabaseError: string | null;
 }) {
-  const hotels = useMemo(() => publishedHotels, [publishedHotels]);
+  const isUsingDemoHotels = publishedHotels.length === 0;
+  const hotels = useMemo(
+    () => (isUsingDemoHotels ? catalogHotels : publishedHotels),
+    [isUsingDemoHotels, publishedHotels],
+  );
   const [search, setSearch] = useState("");
   const [maxPrice, setMaxPrice] = useState(70000);
   const [types, setTypes] = useState<string[]>([]);
@@ -237,6 +241,11 @@ export function HotelsCatalogClient({
                 : "No approved Supabase listings yet."}
             </p>
           </div>
+          {isUsingDemoHotels && process.env.NODE_ENV === "development" ? (
+            <div className="mb-5 rounded-lg border border-[#f0bb67]/50 bg-[#fff8e8] px-5 py-4 text-sm font-semibold text-[#8a5a17]">
+              Showing demo hotels because no published Supabase properties exist yet.
+            </div>
+          ) : null}
           {supabaseError ? (
             <div className="mb-5 rounded-lg border border-[#efc4bd] bg-[#fff0ed] px-5 py-4 text-sm font-semibold text-[#9b2d25]">
               Supabase published listings could not be loaded: {supabaseError}
