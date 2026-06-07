@@ -1,4 +1,7 @@
+"use client";
+
 import { createBookingRequestAction } from "@/lib/actions/bookingActions";
+import { useI18n } from "@/i18n";
 
 type BookingRoomOption = {
   id: string;
@@ -21,6 +24,8 @@ export function BookingRequestForm({
   returnPath,
   rooms,
 }: BookingRequestFormProps) {
+  const { t } = useI18n();
+
   if (bookingSuccess) {
     return (
       <div
@@ -96,7 +101,7 @@ export function BookingRequestForm({
       </label>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
         <label className="grid gap-2 text-sm font-bold">
-          Check-in date
+          {t("booking.checkInDate")}
           <input
             className="h-12 rounded-md border border-stone-300 px-4 font-normal outline-none focus:border-[#2f4d46]"
             name="check_in"
@@ -105,7 +110,7 @@ export function BookingRequestForm({
           />
         </label>
         <label className="grid gap-2 text-sm font-bold">
-          Check-out date
+          {t("booking.checkOutDate")}
           <input
             className="h-12 rounded-md border border-stone-300 px-4 font-normal outline-none focus:border-[#2f4d46]"
             name="check_out"

@@ -1,3 +1,7 @@
+"use client";
+
+import { useI18n } from "@/i18n";
+
 const statusStyles: Record<string, string> = {
   active: "bg-[#dff3e7] text-[#1f6b43]",
   available: "bg-[#dff3e7] text-[#1f6b43]",
@@ -21,13 +25,15 @@ const statusStyles: Record<string, string> = {
 };
 
 export function StatusBadge({ status }: { status: string }) {
+  const { translate } = useI18n();
+
   return (
     <span
       className={`rounded-full px-3 py-1 text-xs font-bold uppercase tracking-[0.12em] ${
         statusStyles[status] ?? "bg-stone-100 text-stone-700"
       }`}
     >
-      {status}
+      {translate(status)}
     </span>
   );
 }
@@ -39,20 +45,24 @@ export function SectionHeader({
   eyebrow: string;
   title: string;
 }) {
+  const { translate } = useI18n();
+
   return (
     <div>
       <p className="text-sm font-bold uppercase tracking-[0.2em] text-[#a66f2d]">
-        {eyebrow}
+        {translate(eyebrow)}
       </p>
-      <h2 className="mt-2 text-3xl font-semibold">{title}</h2>
+      <h2 className="mt-2 text-3xl font-semibold">{translate(title)}</h2>
     </div>
   );
 }
 
 export function FieldLabel({ label }: { label: string }) {
+  const { translate } = useI18n();
+
   return (
     <p className="text-xs font-bold uppercase tracking-[0.14em] text-stone-500">
-      {label}
+      {translate(label)}
     </p>
   );
 }
@@ -64,10 +74,12 @@ export function DashboardField({
   label: string;
   value: string;
 }) {
+  const { translate } = useI18n();
+
   return (
     <div>
       <FieldLabel label={label} />
-      <p className="mt-1 font-semibold">{value}</p>
+      <p className="mt-1 font-semibold">{translate(value)}</p>
     </div>
   );
 }

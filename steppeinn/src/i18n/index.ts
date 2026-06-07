@@ -7,4 +7,4 @@ export {
   supportedLocales,
   useI18n,
 } from "./provider";
-export type { Locale } from "./provider";
+export type { DictionaryKey, Locale } from "./provider";

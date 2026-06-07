@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useI18n } from "@/i18n";
 import { createTwoGisLink } from "@/lib/2gis";
 import type { HotelCardData } from "@/types";
 
@@ -9,6 +12,7 @@ type HotelCardProps = {
 };
 
 export function HotelCard({ hotel }: HotelCardProps) {
+  const { translate } = useI18n();
   const twoGisUrl = createTwoGisLink({
     address: hotel.address ?? hotel.area,
     latitude: hotel.latitude,
@@ -27,7 +31,7 @@ export function HotelCard({ hotel }: HotelCardProps) {
           {hotel.rating}
         </span>
         <span className="absolute bottom-4 left-4 rounded-full border border-white/35 bg-white/18 px-3 py-1 text-xs font-bold uppercase tracking-[0.12em] text-white backdrop-blur">
-          {hotel.imageUrl ? "Photo" : "Mock image"}
+          {hotel.imageUrl ? translate("Photo") : translate("Mock image")}
         </span>
       </div>
       <div className="p-5">
@@ -46,7 +50,7 @@ export function HotelCard({ hotel }: HotelCardProps) {
             className="flex h-11 items-center justify-center rounded-md bg-[#17130f] text-sm font-bold text-white transition group-hover:bg-[#2f4d46]"
             href={`/hotels/${hotel.slug}`}
           >
-            View stay
+            {translate("View stay")}
           </Link>
           <a
             className="flex h-11 items-center justify-center rounded-md border border-stone-300 bg-white text-sm font-bold text-[#2f4d46] transition hover:border-[#2f4d46]"
@@ -54,7 +58,7 @@ export function HotelCard({ hotel }: HotelCardProps) {
             rel="noreferrer"
             target="_blank"
           >
-            Open in 2GIS
+            {translate("Open in 2GIS")}
           </a>
         </div>
       </div>
