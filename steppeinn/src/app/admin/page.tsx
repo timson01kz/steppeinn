@@ -17,8 +17,10 @@ import {
   adminUsers,
   adminViewedHotels,
 } from "@/data/users";
+import { getServerI18n } from "@/i18n/server";
 import { moderatePropertyAction } from "@/lib/actions/propertyActions";
 import { getPendingModerationProperties } from "@/lib/services/propertyService";
+import type { DictionaryKey } from "@/i18n";
 
 const navItems = [
   "Dashboard",
@@ -30,7 +32,7 @@ const navItems = [
   "Tariffs",
   "Reviews",
   "Settings",
-];
+] satisfies DictionaryKey[];
 
 export default async function AdminPage({
   searchParams,
@@ -38,6 +40,7 @@ export default async function AdminPage({
   searchParams: Promise<{ moderation_error?: string; moderation_success?: string }>;
 }) {
   const params = await searchParams;
+  const { t } = await getServerI18n();
   const { data: pendingProperties, error: pendingPropertiesError } =
     await getPendingModerationProperties();
   const displayedProperties =
@@ -61,7 +64,7 @@ export default async function AdminPage({
             </span>
           </Link>
           <span className="rounded-full bg-[#2f4d46] px-4 py-2 text-sm font-bold text-white">
-            Mock system
+            {t("dashboard.admin.mockSystem")}
           </span>
         </div>
       </div>
@@ -69,7 +72,7 @@ export default async function AdminPage({
       <div className="mx-auto grid max-w-7xl gap-6 px-5 py-8 sm:px-8 lg:grid-cols-[260px_1fr]">
         <aside className="h-fit rounded-lg border border-stone-200 bg-white p-4 shadow-sm lg:sticky lg:top-6">
           <p className="px-3 text-xs font-bold uppercase tracking-[0.18em] text-[#a66f2d]">
-            Management
+            {t("Management")}
           </p>
           <nav className="mt-4 grid gap-1">
             {navItems.map((item) => (
@@ -78,7 +81,7 @@ export default async function AdminPage({
                 href={`#${item.toLowerCase().replaceAll(" ", "-")}`}
                 key={item}
               >
-                {item}
+                {t(item)}
               </a>
             ))}
           </nav>
@@ -87,20 +90,20 @@ export default async function AdminPage({
         <div className="grid gap-8">
           <section className="rounded-lg bg-[#17130f] p-6 text-white shadow-[0_28px_90px_rgba(34,28,18,.16)] sm:p-8" id="dashboard">
             <p className="text-sm font-bold uppercase tracking-[0.2em] text-[#f0bb67]">
-              Dashboard
+              {t("Dashboard")}
             </p>
             <h1 className="mt-3 text-4xl font-semibold sm:text-6xl">
-              Platform operations.
+              {t("dashboard.admin.heroTitle")}
             </h1>
             <p className="mt-4 max-w-3xl leading-7 text-white/68">
-              Moderate listings, manage users, configure locations, review
-              ads, and monitor SteppeInn performance from a single admin
-              workspace.
+              {t("dashboard.admin.heroDescription")}
             </p>
             <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               {adminMetrics.map((metric) => (
                 <article className={`rounded-lg p-5 text-[#17130f] ${metric.tone}`} key={metric.label}>
-                  <p className="text-sm font-semibold text-stone-600">{metric.label}</p>
+                  <p className="text-sm font-semibold text-stone-600">
+                    {t(metric.label as DictionaryKey)}
+                  </p>
                   <p className="mt-3 text-3xl font-semibold">{metric.value}</p>
                 </article>
               ))}
@@ -111,7 +114,7 @@ export default async function AdminPage({
             <SectionHeader eyebrow="Moderation" title="Property queue" />
             {params.moderation_success ? (
               <div className="mt-6 rounded-lg border border-[#b8dcc7] bg-[#e9f8ee] px-5 py-4 text-sm font-semibold text-[#1f6b43]">
-                Moderation status saved in Supabase.
+                {t("dashboard.admin.moderationSaved")}
               </div>
             ) : null}
             {params.moderation_error ? (
@@ -121,7 +124,7 @@ export default async function AdminPage({
             ) : null}
             {pendingPropertiesError ? (
               <div className="mt-6 rounded-lg border border-[#efc4bd] bg-[#fff0ed] px-5 py-4 text-sm font-semibold text-[#9b2d25]">
-                Supabase moderation queue could not be loaded: {pendingPropertiesError}
+                {t("dashboard.admin.moderationError")} {pendingPropertiesError}
               </div>
             ) : null}
             <div className="mt-6 grid gap-4">
@@ -142,7 +145,7 @@ export default async function AdminPage({
                     <textarea
                       className="min-h-20 rounded-md border border-stone-300 bg-white px-3 py-2 text-sm font-semibold outline-none focus:border-[#2f4d46]"
                       name="notes"
-                      placeholder="Moderation notes for the owner"
+                      placeholder={t("Moderation notes for the owner")}
                     />
                     <div className="flex flex-wrap gap-2">
                       {[
@@ -159,7 +162,7 @@ export default async function AdminPage({
                           type="submit"
                           value={action.value}
                         >
-                          {action.label}
+                          {t(action.label as DictionaryKey)}
                         </button>
                       ))}
                     </div>
@@ -177,12 +180,14 @@ export default async function AdminPage({
                   <div className="flex items-start justify-between gap-4">
                     <div>
                       <h3 className="text-xl font-semibold">{user.name}</h3>
-                      <p className="mt-1 text-sm font-semibold capitalize text-stone-500">{user.role}</p>
+                      <p className="mt-1 text-sm font-semibold capitalize text-stone-500">
+                        {t(user.role as DictionaryKey)}
+                      </p>
                     </div>
                     <StatusBadge status={user.status} />
                   </div>
                   <button className="mt-5 rounded-md bg-[#17130f] px-4 py-2 text-sm font-bold text-white" type="button">
-                    {user.status === "blocked" ? "Unblock" : "Block"}
+                    {user.status === "blocked" ? t("dashboard.admin.unblock") : t("dashboard.admin.block")}
                   </button>
                 </article>
               ))}
@@ -192,8 +197,14 @@ export default async function AdminPage({
           <section className="rounded-lg border border-stone-200 bg-white p-6 shadow-sm sm:p-8" id="bookings">
             <SectionHeader eyebrow="Bookings" title="Request operations" />
             <div className="mt-6 grid gap-4 md:grid-cols-3">
-              {["New requests: 48", "Confirmed: 312", "Needs support: 9"].map((item) => (
-                <div className="rounded-lg bg-[#f6f3ed] p-5 text-xl font-semibold" key={item}>{item}</div>
+              {[
+                { label: "dashboard.admin.newRequests", value: "48" },
+                { label: "confirmed", value: "312" },
+                { label: "dashboard.admin.needsSupport", value: "9" },
+              ].map((item) => (
+                <div className="rounded-lg bg-[#f6f3ed] p-5 text-xl font-semibold" key={item.label}>
+                  {t(item.label as DictionaryKey)}: {item.value}
+                </div>
               ))}
             </div>
           </section>
@@ -205,7 +216,7 @@ export default async function AdminPage({
                 <article className="flex items-center justify-between rounded-lg border border-stone-200 bg-[#fbf8f1] p-4" key={location}>
                   <span className="font-semibold">{location}</span>
                   <button className="rounded-md border border-stone-300 bg-white px-3 py-2 text-sm font-bold" type="button">
-                    Edit
+                    {t("dashboard.admin.edit")}
                   </button>
                 </article>
               ))}
@@ -218,10 +229,12 @@ export default async function AdminPage({
               {adminAdvertisements.map((ad) => (
                 <article className="rounded-lg border border-stone-200 bg-[#fbf8f1] p-5" key={ad.name}>
                   <div className="flex items-center justify-between gap-4">
-                    <h3 className="text-xl font-semibold">{ad.name}</h3>
+                    <h3 className="text-xl font-semibold">{t(ad.name as DictionaryKey)}</h3>
                     <StatusBadge status={ad.status} />
                   </div>
-                  <p className="mt-3 text-sm font-semibold text-stone-600">{ad.placement}</p>
+                  <p className="mt-3 text-sm font-semibold text-stone-600">
+                    {t(ad.placement as DictionaryKey)}
+                  </p>
                 </article>
               ))}
             </div>
@@ -232,9 +245,11 @@ export default async function AdminPage({
             <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
               {adminTariffs.map((tariff) => (
                 <article className="rounded-lg bg-[#f6f3ed] p-5" key={tariff.name}>
-                  <h3 className="text-lg font-semibold">{tariff.name}</h3>
+                  <h3 className="text-lg font-semibold">{t(tariff.name as DictionaryKey)}</h3>
                   <p className="mt-4 text-2xl font-bold text-[#2f4d46]">{tariff.price}</p>
-                  <p className="mt-2 text-sm font-semibold text-stone-500">{tariff.period}</p>
+                  <p className="mt-2 text-sm font-semibold text-stone-500">
+                    {t(tariff.period as DictionaryKey)}
+                  </p>
                 </article>
               ))}
             </div>
@@ -248,13 +263,13 @@ export default async function AdminPage({
                   <div>
                     <h3 className="font-semibold">{review.hotel}</h3>
                     <p className="mt-1 text-sm text-stone-600">
-                      {review.author} · rating {review.rating}
+                      {review.author} · {t("dashboard.admin.rating")} {review.rating}
                     </p>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {["Approve", "Hide", "Delete"].map((action) => (
                       <button className="rounded-md border border-stone-300 bg-white px-4 py-2 text-sm font-bold" key={action} type="button">
-                        {action}
+                        {t(action as DictionaryKey)}
                       </button>
                     ))}
                   </div>
@@ -266,10 +281,10 @@ export default async function AdminPage({
           <section className="rounded-lg border border-stone-200 bg-white p-6 shadow-sm sm:p-8" id="settings">
             <SectionHeader eyebrow="Analytics" title="Search, views, booking trends" />
             <div className="mt-6 grid gap-5 xl:grid-cols-3">
-              <AnalyticsCard title="Top searched locations" items={adminSearchedLocations.map((item) => `${item.name} ${item.value}`)} />
-              <AnalyticsCard title="Most viewed hotels" items={adminViewedHotels} />
+              <AnalyticsCard title={t("dashboard.admin.topSearchedLocations")} items={adminSearchedLocations.map((item) => `${item.name} ${item.value}`)} />
+              <AnalyticsCard title={t("dashboard.admin.mostViewedHotels")} items={adminViewedHotels} />
               <div className="rounded-lg bg-[#17130f] p-5 text-white">
-                <h3 className="text-xl font-semibold">Booking trends</h3>
+                <h3 className="text-xl font-semibold">{t("Booking trends")}</h3>
                 <div className="mt-6 flex h-44 items-end gap-3">
                   {adminTrendBars.map((height, index) => (
                     <div className="flex flex-1 flex-col items-center gap-2" key={`${height}-${index}`}>

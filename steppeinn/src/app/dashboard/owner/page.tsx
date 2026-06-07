@@ -7,9 +7,11 @@ import {
   ownerProperties,
   ownerTopLocations,
 } from "@/data/users";
+import { getServerI18n } from "@/i18n/server";
 import { respondToBookingRequestAction } from "@/lib/actions/bookingActions";
 import { getOwnerBookingRequests } from "@/lib/services/bookingService";
 import { getCurrentOwnerProperties } from "@/lib/services/propertyService";
+import type { DictionaryKey } from "@/i18n";
 
 export const dynamic = "force-dynamic";
 
@@ -17,10 +19,10 @@ const sidebarItems = [
   { label: "Overview", href: "#overview" },
   { label: "My properties", href: "#properties" },
   { label: "Add property", href: "/dashboard/owner/properties/new" },
-  { label: "Requests", href: "#requests" },
+  { label: "dashboard.owner.nav.requests", href: "#requests" },
   { label: "Billing", href: "#billing" },
   { label: "Statistics", href: "#statistics" },
-];
+] satisfies Array<{ label: DictionaryKey; href: string }>;
 
 export default async function OwnerDashboardPage({
   searchParams,
@@ -28,6 +30,7 @@ export default async function OwnerDashboardPage({
   searchParams: Promise<{ booking_error?: string; booking_success?: string }>;
 }) {
   const params = await searchParams;
+  const { t } = await getServerI18n();
   const { data: supabaseProperties, error: propertiesError } =
     await getCurrentOwnerProperties();
   const { data: bookingRequests, error: bookingRequestsError } =
@@ -61,7 +64,7 @@ export default async function OwnerDashboardPage({
             className="rounded-full bg-[#17130f] px-5 py-2.5 text-sm font-bold text-white"
             href="/for-hotels"
           >
-            Partner center
+            {t("dashboard.owner.partnerCenter")}
           </Link>
         </div>
       </div>
@@ -69,7 +72,7 @@ export default async function OwnerDashboardPage({
       <div className="mx-auto grid w-full max-w-7xl gap-6 px-5 py-8 sm:px-8 lg:grid-cols-[260px_1fr]">
         <aside className="h-fit rounded-lg border border-stone-200 bg-white p-4 shadow-sm lg:sticky lg:top-6">
           <p className="px-3 text-xs font-bold uppercase tracking-[0.18em] text-[#a66f2d]">
-            Owner dashboard
+            {t("Owner dashboard")}
           </p>
           <nav className="mt-4 grid gap-1">
             {sidebarItems.map((item) => (
@@ -78,15 +81,14 @@ export default async function OwnerDashboardPage({
                 href={item.href}
                 key={item.href}
               >
-                {item.label}
+                {t(item.label)}
               </a>
             ))}
           </nav>
           <div className="mt-6 rounded-lg bg-[#17130f] p-4 text-white">
-            <p className="text-sm font-bold">Mock mode</p>
+            <p className="text-sm font-bold">{t("Mock mode")}</p>
             <p className="mt-2 text-sm leading-6 text-white/62">
-              Supabase now powers owner-submitted listings. Remaining dashboard
-              modules still use local mock content.
+              {t("dashboard.owner.mockDescription")}
             </p>
           </div>
         </aside>
@@ -97,23 +99,22 @@ export default async function OwnerDashboardPage({
             id="overview"
           >
             <p className="text-sm font-bold uppercase tracking-[0.2em] text-[#f0bb67]">
-              Overview
+              {t("Overview")}
             </p>
             <div className="mt-4 flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
               <div>
                 <h1 className="text-4xl font-semibold sm:text-6xl">
-                  Manage your stays.
+                  {t("Manage your stays.")}
                 </h1>
                 <p className="mt-4 max-w-3xl leading-7 text-white/68">
-                  Track property performance, requests, moderation, billing, and
-                  listing setup from one owner workspace.
+                  {t("dashboard.owner.overviewDescription")}
                 </p>
               </div>
               <Link
                 className="inline-flex rounded-md bg-white px-5 py-3 font-bold text-[#17130f]"
                 href="/dashboard/owner/properties/new"
               >
-                Add property
+                {t("Add property")}
               </Link>
             </div>
             <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -122,9 +123,13 @@ export default async function OwnerDashboardPage({
                   className="rounded-lg border border-white/12 bg-white/10 p-5 backdrop-blur"
                   key={metric.label}
                 >
-                  <p className="text-sm font-semibold text-white/62">{metric.label}</p>
+                  <p className="text-sm font-semibold text-white/62">
+                    {t(metric.label as DictionaryKey)}
+                  </p>
                   <p className="mt-3 text-3xl font-semibold">{metric.value}</p>
-                  <p className="mt-2 text-sm text-[#f0bb67]">{metric.trend}</p>
+                  <p className="mt-2 text-sm text-[#f0bb67]">
+                    {t(metric.trend as DictionaryKey)}
+                  </p>
                 </article>
               ))}
             </div>
@@ -134,17 +139,17 @@ export default async function OwnerDashboardPage({
             <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
               <div>
                 <p className="text-sm font-bold uppercase tracking-[0.2em] text-[#a66f2d]">
-                  My properties
+                  {t("My properties")}
                 </p>
-                <h2 className="mt-2 text-3xl font-semibold">Listings</h2>
+                <h2 className="mt-2 text-3xl font-semibold">{t("Listings")}</h2>
               </div>
               <Link className="font-bold text-[#2f4d46]" href="/dashboard/owner/properties/new">
-                Create new listing
+                {t("Create new listing")}
               </Link>
             </div>
             {propertiesError ? (
               <div className="mt-6 rounded-lg border border-[#efc4bd] bg-[#fff0ed] px-5 py-4 text-sm font-semibold text-[#9b2d25]">
-                Supabase properties could not be loaded: {propertiesError}
+                {t("dashboard.owner.propertiesError")} {propertiesError}
               </div>
             ) : null}
             <div className="mt-6 grid gap-4">
@@ -159,18 +164,18 @@ export default async function OwnerDashboardPage({
                       <StatusBadge status={property.status} />
                     </div>
                     <p className="mt-2 text-sm text-stone-600">
-                      {property.location} · {property.views} views ·{" "}
-                      {property.requests} requests
+                      {property.location} · {property.views} {t("dashboard.owner.views")} ·{" "}
+                      {property.requests} {t("dashboard.owner.requests")}
                     </p>
                     {property.moderationNotes ? (
                       <p className="mt-3 rounded-md bg-white px-4 py-3 text-sm font-semibold text-stone-700">
-                        Moderation notes: {property.moderationNotes}
+                        {t("Moderation notes for the owner")} {property.moderationNotes}
                       </p>
                     ) : null}
                     {property.moderationHistory.length > 0 ? (
                       <div className="mt-4 grid gap-2">
                         <p className="text-xs font-bold uppercase tracking-[0.14em] text-stone-500">
-                          Moderation history
+                          {t("dashboard.owner.moderationHistory")}
                         </p>
                         {property.moderationHistory.slice(0, 3).map((event) => (
                           <div
@@ -190,13 +195,13 @@ export default async function OwnerDashboardPage({
                       className="rounded-md border border-stone-300 px-4 py-2 text-sm font-bold"
                       href="/dashboard/owner/properties"
                     >
-                      Edit photos
+                      {t("dashboard.owner.editPhotos")}
                     </Link>
                     <Link
                       className="rounded-md bg-[#17130f] px-4 py-2 text-sm font-bold text-white"
                       href={`/hotels/${property.slug ?? "kok-tobe-skyline-residence"}`}
                     >
-                      Preview
+                      {t("dashboard.owner.preview")}
                     </Link>
                   </div>
                 </article>
@@ -206,9 +211,9 @@ export default async function OwnerDashboardPage({
 
           <section className="rounded-lg border border-stone-200 bg-white p-6 shadow-sm sm:p-8" id="add-property">
             <p className="text-sm font-bold uppercase tracking-[0.2em] text-[#a66f2d]">
-              Add property
+              {t("Add property")}
             </p>
-            <h2 className="mt-2 text-3xl font-semibold">Listing flow placeholder</h2>
+            <h2 className="mt-2 text-3xl font-semibold">{t("Listing flow placeholder")}</h2>
             <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
               {addPropertySteps.map((step, index) => (
                 <article
@@ -218,9 +223,9 @@ export default async function OwnerDashboardPage({
                   <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#2f4d46] text-sm font-bold text-white">
                     {index + 1}
                   </span>
-                  <h3 className="mt-4 text-xl font-semibold">{step}</h3>
+                  <h3 className="mt-4 text-xl font-semibold">{t(step as DictionaryKey)}</h3>
                   <p className="mt-2 text-sm leading-6 text-stone-600">
-                    Placeholder form step for future owner onboarding.
+                    {t("dashboard.owner.addStepPlaceholder")}
                   </p>
                 </article>
               ))}
@@ -229,18 +234,18 @@ export default async function OwnerDashboardPage({
               className="mt-6 inline-flex rounded-md bg-[#17130f] px-5 py-3 font-bold text-white"
               href="/dashboard/owner/properties/new"
             >
-              Submit for moderation
+              {t("Submit for moderation")}
             </Link>
           </section>
 
           <section className="rounded-lg border border-stone-200 bg-white p-6 shadow-sm sm:p-8" id="requests">
             <p className="text-sm font-bold uppercase tracking-[0.2em] text-[#a66f2d]">
-              Booking requests
+              {t("Booking requests")}
             </p>
-            <h2 className="mt-2 text-3xl font-semibold">Guest inquiries</h2>
+            <h2 className="mt-2 text-3xl font-semibold">{t("Guest inquiries")}</h2>
             {params.booking_success ? (
               <div className="mt-6 rounded-lg border border-[#b8dcc7] bg-[#e9f8ee] px-5 py-4 text-sm font-semibold text-[#1f6b43]">
-                Booking response saved.
+                {t("dashboard.owner.bookingResponseSaved")}
               </div>
             ) : null}
             {params.booking_error || bookingRequestsError ? (
@@ -257,31 +262,31 @@ export default async function OwnerDashboardPage({
                   <div className="grid gap-3 md:grid-cols-5">
                     <div>
                       <p className="text-xs font-bold uppercase tracking-[0.14em] text-stone-500">
-                        Guest
+                        {t("dashboard.owner.guest")}
                       </p>
                       <p className="mt-1 font-semibold">{request.guestName}</p>
                     </div>
                     <div>
                       <p className="text-xs font-bold uppercase tracking-[0.14em] text-stone-500">
-                        Dates
+                        {t("Dates")}
                       </p>
                       <p className="mt-1 font-semibold">{request.dates}</p>
                     </div>
                     <div>
                       <p className="text-xs font-bold uppercase tracking-[0.14em] text-stone-500">
-                        Guests
+                        {t("Guests")}
                       </p>
                       <p className="mt-1 font-semibold">{request.guests}</p>
                     </div>
                     <div>
                       <p className="text-xs font-bold uppercase tracking-[0.14em] text-stone-500">
-                        Room
+                        {t("Room")}
                       </p>
                       <p className="mt-1 font-semibold">{request.roomName}</p>
                     </div>
                     <div>
                       <p className="text-xs font-bold uppercase tracking-[0.14em] text-stone-500">
-                        Status
+                        {t("Status")}
                       </p>
                       <div className="mt-1">
                         <StatusBadge status={request.status} />
@@ -294,7 +299,7 @@ export default async function OwnerDashboardPage({
                       className="min-h-20 rounded-md border border-stone-300 bg-white px-3 py-2 text-sm font-semibold outline-none focus:border-[#2f4d46]"
                       defaultValue={request.responseMessage ?? ""}
                       name="response_message"
-                      placeholder="Response message for the guest"
+                      placeholder={t("Response message for the guest")}
                     />
                     <div className="flex flex-wrap gap-2">
                       <button
@@ -303,7 +308,7 @@ export default async function OwnerDashboardPage({
                         type="submit"
                         value="confirm"
                       >
-                        Confirm
+                        {t("Confirm")}
                       </button>
                       <button
                         className="rounded-md border border-stone-300 bg-white px-4 py-2 text-sm font-bold"
@@ -311,7 +316,7 @@ export default async function OwnerDashboardPage({
                         type="submit"
                         value="decline"
                       >
-                        Decline
+                        {t("Decline")}
                       </button>
                     </div>
                   </form>
@@ -319,7 +324,7 @@ export default async function OwnerDashboardPage({
               ))}
               {bookingRequests.length === 0 ? (
                 <p className="rounded-lg border border-dashed border-stone-300 bg-[#fbf8f1] p-5 text-sm font-semibold text-stone-600">
-                  No Supabase booking requests yet.
+                  {t("No Supabase booking requests yet.")}
                 </p>
               ) : null}
             </div>
@@ -327,18 +332,20 @@ export default async function OwnerDashboardPage({
 
           <section className="rounded-lg border border-stone-200 bg-white p-6 shadow-sm sm:p-8" id="billing">
             <p className="text-sm font-bold uppercase tracking-[0.2em] text-[#a66f2d]">
-              Billing
+              {t("Billing")}
             </p>
-            <h2 className="mt-2 text-3xl font-semibold">Simple MVP pricing</h2>
+            <h2 className="mt-2 text-3xl font-semibold">{t("Simple MVP pricing")}</h2>
             <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
               {ownerBillingPlans.map((plan) => (
                 <article
                   className="rounded-lg border border-stone-200 bg-[#f6f3ed] p-5"
                   key={plan.name}
                 >
-                  <h3 className="text-lg font-semibold">{plan.name}</h3>
+                  <h3 className="text-lg font-semibold">{t(plan.name as DictionaryKey)}</h3>
                   <p className="mt-4 text-2xl font-bold text-[#2f4d46]">{plan.price}</p>
-                  <p className="mt-3 text-sm leading-6 text-stone-600">{plan.note}</p>
+                  <p className="mt-3 text-sm leading-6 text-stone-600">
+                    {t(plan.note as DictionaryKey)}
+                  </p>
                 </article>
               ))}
             </div>
@@ -346,24 +353,26 @@ export default async function OwnerDashboardPage({
 
           <section className="rounded-lg border border-stone-200 bg-white p-6 shadow-sm sm:p-8" id="statistics">
             <p className="text-sm font-bold uppercase tracking-[0.2em] text-[#a66f2d]">
-              Statistics
+              {t("Statistics")}
             </p>
-            <h2 className="mt-2 text-3xl font-semibold">Performance snapshot</h2>
+            <h2 className="mt-2 text-3xl font-semibold">{t("Performance snapshot")}</h2>
             <div className="mt-6 grid gap-5 lg:grid-cols-[1fr_.8fr]">
               <div className="grid gap-4 sm:grid-cols-3">
                 {[
-                  { label: "Views", value: "18 420" },
-                  { label: "Inquiries", value: "126" },
-                  { label: "Conversion rate", value: "6.8%" },
+                  { label: "dashboard.owner.stats.views", value: "18 420" },
+                  { label: "dashboard.owner.stats.inquiries", value: "126" },
+                  { label: "dashboard.owner.stats.conversionRate", value: "6.8%" },
                 ].map((stat) => (
                   <article className="rounded-lg bg-[#f6f3ed] p-5" key={stat.label}>
-                    <p className="text-sm font-semibold text-stone-500">{stat.label}</p>
+                    <p className="text-sm font-semibold text-stone-500">
+                      {t(stat.label as DictionaryKey)}
+                    </p>
                     <p className="mt-3 text-3xl font-semibold">{stat.value}</p>
                   </article>
                 ))}
               </div>
               <div className="rounded-lg bg-[#17130f] p-5 text-white">
-                <h3 className="text-xl font-semibold">Top locations</h3>
+                <h3 className="text-xl font-semibold">{t("Top locations")}</h3>
                 <div className="mt-5 grid gap-4">
                   {ownerTopLocations.map((location) => (
                     <div key={location.name}>
