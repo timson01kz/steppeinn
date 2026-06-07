@@ -43,31 +43,71 @@ select {
 }
 
 .glass-panel {
-  border: 1px solid rgb(255 255 255 / 42%);
+  border: 1px solid rgb(255 255 255 / 46%);
   border-radius: 8px;
   background:
-    linear-gradient(135deg, rgb(255 255 255 / 24%), rgb(255 255 255 / 10%)),
-    rgb(255 255 255 / 12%);
-  box-shadow: 0 30px 90px rgb(23 19 15 / 24%);
-  backdrop-filter: blur(24px);
+    linear-gradient(135deg, rgb(255 255 255 / 30%), rgb(255 255 255 / 12%)),
+    rgb(255 255 255 / 14%);
+  box-shadow:
+    0 30px 90px rgb(23 19 15 / 30%),
+    inset 0 1px 0 rgb(255 255 255 / 34%);
+  backdrop-filter: blur(28px) saturate(1.18);
 }
 
 .hero-day {
+  background-color: #2f7584;
   background:
+    linear-gradient(180deg, rgb(23 19 15 / 8%) 0%, rgb(23 19 15 / 24%) 48%, rgb(23 19 15 / 68%) 100%),
     radial-gradient(circle at 74% 18%, rgb(255 237 190 / 66%), transparent 30%),
+    url("/images/almaty-day.jpg"),
     linear-gradient(135deg, #87b7aa 0%, #2f7584 44%, #173b48 100%);
+  background-position: center;
+  background-size: cover;
 }
 
 .hero-night {
+  background-color: #0f172a;
   background:
+    linear-gradient(180deg, rgb(5 10 20 / 18%) 0%, rgb(5 10 20 / 42%) 48%, rgb(5 10 20 / 76%) 100%),
     radial-gradient(circle at 74% 18%, rgb(240 187 103 / 42%), transparent 28%),
+    url("/images/almaty-night.jpg"),
     linear-gradient(135deg, #0f172a 0%, #223b5b 45%, #5d4938 100%);
+  background-position: center;
+  background-size: cover;
+}
+
+.hero-ambient {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 12% 22%, rgb(255 255 255 / 18%), transparent 24%),
+    radial-gradient(circle at 82% 20%, rgb(240 187 103 / 20%), transparent 28%),
+    linear-gradient(90deg, rgb(23 19 15 / 34%), transparent 42%, rgb(23 19 15 / 26%));
 }
 
 .mountain-layer {
   background:
-    linear-gradient(145deg, transparent 0 30%, rgb(255 255 255 / 80%) 30% 32%, transparent 32% 42%, rgb(23 19 15 / 18%) 42% 100%),
-    linear-gradient(160deg, transparent 0 42%, rgb(255 255 255 / 62%) 42% 44%, transparent 44% 58%, rgb(23 19 15 / 20%) 58% 100%);
+    linear-gradient(145deg, transparent 0 26%, rgb(255 255 255 / 72%) 26% 28%, transparent 28% 42%, rgb(23 19 15 / 32%) 42% 100%),
+    linear-gradient(160deg, transparent 0 38%, rgb(255 255 255 / 48%) 38% 40%, transparent 40% 57%, rgb(23 19 15 / 34%) 57% 100%),
+    linear-gradient(172deg, transparent 0 52%, rgb(23 19 15 / 42%) 52% 100%);
+  opacity: 0.9;
+}
+
+.city-panorama-layer {
+  background:
+    linear-gradient(90deg, rgb(23 19 15 / 52%), rgb(23 19 15 / 18%), rgb(23 19 15 / 42%)),
+    repeating-linear-gradient(
+      90deg,
+      rgb(255 255 255 / 16%) 0 2px,
+      transparent 2px 18px
+    ),
+    linear-gradient(
+      180deg,
+      transparent 0 34%,
+      rgb(23 19 15 / 20%) 34% 48%,
+      rgb(23 19 15 / 52%) 48% 100%
+    );
+  clip-path: polygon(0 56%, 7% 52%, 12% 60%, 18% 45%, 25% 58%, 31% 43%, 39% 55%, 47% 38%, 53% 58%, 61% 49%, 68% 57%, 75% 42%, 83% 55%, 91% 48%, 100% 57%, 100% 100%, 0 100%);
 }
 
 .city-map-grid {
@@ -83,6 +123,52 @@ select {
   animation: rise 700ms ease-out both;
 }
 
+.hero-airplane {
+  position: absolute;
+  top: 21%;
+  left: -90px;
+  z-index: 3;
+  width: 78px;
+  height: 24px;
+  opacity: 0.74;
+  transform: rotate(-8deg);
+  animation: hero-plane-flight 18s ease-in-out infinite;
+}
+
+.hero-airplane-body {
+  position: absolute;
+  top: 10px;
+  left: 8px;
+  width: 58px;
+  height: 3px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 82%);
+  box-shadow: 0 0 18px rgb(255 255 255 / 38%);
+}
+
+.hero-airplane-body::before,
+.hero-airplane-body::after {
+  content: "";
+  position: absolute;
+  background: rgb(255 255 255 / 78%);
+}
+
+.hero-airplane-body::before {
+  top: -9px;
+  left: 25px;
+  width: 18px;
+  height: 18px;
+  clip-path: polygon(0 56%, 100% 0, 58% 100%);
+}
+
+.hero-airplane-body::after {
+  top: -5px;
+  right: -1px;
+  width: 12px;
+  height: 12px;
+  clip-path: polygon(0 0, 100% 48%, 0 100%);
+}
+
 @keyframes rise {
   from {
     opacity: 0;
@@ -92,5 +178,25 @@ select {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes hero-plane-flight {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 12px, 0) rotate(-8deg);
+  }
+
+  12% {
+    opacity: 0.74;
+  }
+
+  72% {
+    opacity: 0.74;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate3d(calc(100vw + 180px), -70px, 0) rotate(-8deg);
   }
 }
