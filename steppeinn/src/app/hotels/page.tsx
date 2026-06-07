@@ -1,19 +1,21 @@
 import { HotelsCatalogClient } from "./HotelsCatalogClient";
-import { getAlmatyLocations } from "@/lib/services/locationService";
 import { getPublishedCatalogProperties } from "@/lib/services/propertyService";
 
 export const dynamic = "force-dynamic";
 
-export default async function HotelsPage() {
-  const [
-    { data: publishedHotels, error: propertiesError },
-    { data: locations, error: locationsError },
-  ] = await Promise.all([getPublishedCatalogProperties(), getAlmatyLocations()]);
-  const error = propertiesError ?? locationsError;
+export default async function HotelsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ nearby?: string }>;
+}) {
+  const [{ data: publishedHotels, error }, query] = await Promise.all([
+    getPublishedCatalogProperties(),
+    searchParams,
+  ]);
 
   return (
     <HotelsCatalogClient
-      locations={locations}
+      initialNearby={query.nearby}
       publishedHotels={publishedHotels}
       supabaseError={error}
     />

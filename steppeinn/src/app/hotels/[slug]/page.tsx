@@ -7,6 +7,7 @@ import { HotelCard } from "@/components/HotelCard";
 import { SectionTitle } from "@/components/SectionTitle";
 import { hotelDetail, hotelReviews, rooms, similarHotels } from "@/data/hotels";
 import { hotelNearbyPlaces } from "@/data/locations";
+import { createTwoGisLink } from "@/lib/2gis";
 import { getPublishedPropertyDetail } from "@/lib/services/propertyService";
 
 type HotelDetailsPageProps = {
@@ -48,7 +49,15 @@ export default async function HotelDetailsPage({
       publishedProperty && publishedProperty.amenities.length > 0
         ? publishedProperty.amenities
         : hotelDetail.amenities,
+    latitude: publishedProperty?.latitude ?? null,
+    longitude: publishedProperty?.longitude ?? null,
   };
+  const twoGisUrl = createTwoGisLink({
+    address: detail.address,
+    latitude: detail.latitude,
+    longitude: detail.longitude,
+    name: displayName,
+  });
   const realPhotos = publishedProperty?.photos ?? [];
   const bookingRooms =
     publishedProperty?.rooms.map((room) => ({
@@ -261,15 +270,36 @@ export default async function HotelDetailsPage({
 
           <section>
             <SectionTitle
-              description="Map integration is intentionally deferred until data and provider decisions are ready."
-              eyebrow="Map"
-              title="Location preview."
+              description="Open the hotel location in 2GIS for routes, entrances, and nearby city context."
+              eyebrow="Location"
+              title="Plan the area around your stay."
             />
-            <div className="relative mt-8 min-h-[420px] overflow-hidden rounded-lg border border-stone-200 bg-[#dde8df] shadow-[0_28px_90px_rgba(34,28,18,.12)]">
-              <div className="absolute inset-0 city-map-grid" />
-              <div className="absolute left-[18%] top-[30%] h-2 w-[68%] rotate-[24deg] rounded-full bg-white/70" />
-              <div className="absolute left-[22%] top-[58%] h-2 w-[62%] -rotate-[11deg] rounded-full bg-white/70" />
-              <div className="absolute left-[54%] top-[39%] h-7 w-7 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-[#f0bb67] shadow-[0_0_0_12px_rgba(240,187,103,.24)]" />
+            <div className="mt-8 rounded-lg border border-stone-200 bg-white p-6 shadow-sm">
+              <p className="text-sm font-bold uppercase tracking-[0.16em] text-stone-500">
+                Address
+              </p>
+              <p className="mt-2 text-xl font-semibold">{detail.address}</p>
+              <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                {hotelNearbyPlaces.map((place) => (
+                  <div
+                    className="flex items-center justify-between rounded-md bg-[#f6f3ed] px-4 py-3"
+                    key={place.name}
+                  >
+                    <span className="text-sm font-semibold">{place.name}</span>
+                    <span className="text-sm font-bold text-[#2f4d46]">
+                      {place.distance}
+                    </span>
+                  </div>
+                ))}
+              </div>
+              <a
+                className="mt-6 inline-flex h-12 items-center justify-center rounded-md bg-[#17130f] px-6 font-bold text-white transition hover:bg-[#2f4d46]"
+                href={twoGisUrl}
+                rel="noreferrer"
+                target="_blank"
+              >
+                Open in 2GIS
+              </a>
             </div>
           </section>
 

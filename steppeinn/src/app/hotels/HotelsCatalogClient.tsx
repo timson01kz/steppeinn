@@ -1,14 +1,13 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
 import { HotelCard } from "@/components/HotelCard";
-import { TwoGisMap } from "@/components/maps/TwoGisMap";
 import { SectionTitle } from "@/components/SectionTitle";
 import { amenityOptions, propertyTypes } from "@/data/hotels";
 import { nearbyPlaceOptions } from "@/data/locations";
-import type { CatalogHotel, LocationCardData, SortMode, ViewMode } from "@/types";
+import type { CatalogHotel, SortMode, ViewMode } from "@/types";
 
 function toggleFilter(value: string, selected: string[]) {
   return selected.includes(value)
@@ -17,11 +16,11 @@ function toggleFilter(value: string, selected: string[]) {
 }
 
 export function HotelsCatalogClient({
-  locations,
+  initialNearby,
   publishedHotels,
   supabaseError,
 }: {
-  locations: LocationCardData[];
+  initialNearby?: string;
   publishedHotels: CatalogHotel[];
   supabaseError: string | null;
 }) {
@@ -31,10 +30,11 @@ export function HotelsCatalogClient({
   const [types, setTypes] = useState<string[]>([]);
   const [minRating, setMinRating] = useState("0");
   const [amenities, setAmenities] = useState<string[]>([]);
-  const [nearby, setNearby] = useState("All");
+  const [nearby, setNearby] = useState(
+    initialNearby && nearbyPlaceOptions.includes(initialNearby) ? initialNearby : "All",
+  );
   const [sort, setSort] = useState<SortMode>("recommended");
   const [view, setView] = useState<ViewMode>("list");
-  const [activeHotel, setActiveHotel] = useState(hotels[0]?.slug ?? "");
 
   const filteredHotels = useMemo(() => {
     const result = hotels.filter((hotel) => {
@@ -65,10 +65,6 @@ export function HotelsCatalogClient({
       return b.ratingValue * 10 - b.distanceValue - (a.ratingValue * 10 - a.distanceValue);
     });
   }, [amenities, hotels, maxPrice, minRating, nearby, search, sort, types]);
-
-  const activeHotelData =
-    filteredHotels.find((hotel) => hotel.slug === activeHotel) ?? filteredHotels[0];
-  const handlePropertySelect = useCallback((slug: string) => setActiveHotel(slug), []);
 
   return (
     <main className="min-h-screen bg-[#f6f3ed] text-[#17130f]">
@@ -254,20 +250,22 @@ export function HotelsCatalogClient({
               ))}
             </div>
           ) : (
-            <div className="grid gap-5 xl:grid-cols-[1fr_320px]">
-              <TwoGisMap
-                activeSlug={activeHotelData?.slug}
-                className="min-h-[620px] shadow-[0_28px_90px_rgba(34,28,18,.12)]"
-                locations={locations}
-                onPropertySelect={handlePropertySelect}
-                properties={filteredHotels}
-              />
-              <div className="rounded-lg border border-stone-200 bg-white p-5 shadow-sm">
-                {activeHotelData ? (
-                  <HotelCard hotel={activeHotelData} />
-                ) : (
-                  <p className="text-stone-600">No hotels match these filters.</p>
-                )}
+            <div className="rounded-lg border border-stone-200 bg-white p-5 shadow-sm">
+              <div className="mb-5 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
+                <div>
+                  <p className="text-sm font-bold uppercase tracking-[0.18em] text-[#a66f2d]">
+                    Location view
+                  </p>
+                  <h3 className="mt-2 text-2xl font-semibold">Open stays in 2GIS</h3>
+                </div>
+                <p className="max-w-md text-sm font-semibold text-stone-500">
+                  The MVP uses direct 2GIS links instead of an embedded map.
+                </p>
+              </div>
+              <div className="grid gap-6 md:grid-cols-2">
+                {filteredHotels.map((hotel) => (
+                  <HotelCard hotel={hotel} key={hotel.slug} />
+                ))}
               </div>
             </div>
           )}
