@@ -7,6 +7,7 @@ import { HotelCard } from "@/components/HotelCard";
 import { SectionTitle } from "@/components/SectionTitle";
 import { amenityOptions, catalogHotels, propertyTypes } from "@/data/hotels";
 import { nearbyPlaceOptions } from "@/data/locations";
+import { useI18n } from "@/i18n";
 import type { CatalogHotel, SortMode, ViewMode } from "@/types";
 
 function toggleFilter(value: string, selected: string[]) {
@@ -24,6 +25,7 @@ export function HotelsCatalogClient({
   publishedHotels: CatalogHotel[];
   supabaseError: string | null;
 }) {
+  const { t, translate } = useI18n();
   const isUsingDemoHotels = publishedHotels.length === 0;
   const hotels = useMemo(
     () => (isUsingDemoHotels ? catalogHotels : publishedHotels),
@@ -86,7 +88,7 @@ export function HotelsCatalogClient({
             <input
               className="h-13 rounded-md border border-white/20 bg-white px-4 text-base font-semibold text-[#17130f] outline-none"
               onChange={(event) => setSearch(event.target.value)}
-              placeholder="Search by hotel name"
+              placeholder={translate("Search by hotel name")}
               value={search}
             />
             <select
@@ -94,10 +96,10 @@ export function HotelsCatalogClient({
               onChange={(event) => setSort(event.target.value as SortMode)}
               value={sort}
             >
-              <option value="recommended">Recommended</option>
-              <option value="price">Price low to high</option>
-              <option value="rating">Rating high to low</option>
-              <option value="distance">Distance</option>
+              <option value="recommended">{translate("Recommended")}</option>
+              <option value="price">{translate("Price low to high")}</option>
+              <option value="rating">{translate("Rating high to low")}</option>
+              <option value="distance">{translate("Distance")}</option>
             </select>
             <div className="grid h-13 grid-cols-2 rounded-md bg-white/12 p-1">
               {(["list", "map"] as ViewMode[]).map((mode) => (
@@ -109,7 +111,7 @@ export function HotelsCatalogClient({
                   onClick={() => setView(mode)}
                   type="button"
                 >
-                  {mode}
+                  {translate(`catalog.view.${mode}`)}
                 </button>
               ))}
             </div>
@@ -120,7 +122,7 @@ export function HotelsCatalogClient({
       <section className="mx-auto grid w-full max-w-7xl gap-6 px-5 pb-16 sm:px-8 lg:grid-cols-[290px_1fr]">
         <aside className="h-fit rounded-lg border border-stone-200 bg-white p-5 shadow-sm lg:sticky lg:top-5">
           <div className="flex items-center justify-between gap-4">
-            <h2 className="text-xl font-semibold">Filters</h2>
+            <h2 className="text-xl font-semibold">{translate("Filters")}</h2>
             <button
               className="text-sm font-bold text-[#2f4d46]"
               onClick={() => {
@@ -133,14 +135,14 @@ export function HotelsCatalogClient({
               }}
               type="button"
             >
-              Reset
+              {translate("Reset")}
             </button>
           </div>
 
           <div className="mt-6 grid gap-6">
             <label className="grid gap-3">
               <span className="text-sm font-bold uppercase tracking-[0.14em] text-stone-500">
-                Price up to {maxPrice.toLocaleString("ru-RU")} KZT
+                {t("catalog.priceUpTo")} {maxPrice.toLocaleString("ru-RU")} KZT
               </span>
               <input
                 max="70000"
@@ -154,7 +156,7 @@ export function HotelsCatalogClient({
 
             <div>
               <p className="text-sm font-bold uppercase tracking-[0.14em] text-stone-500">
-                Property type
+                {translate("Property type")}
               </p>
               <div className="mt-3 grid gap-2">
                 {propertyTypes.map((type) => (
@@ -172,14 +174,14 @@ export function HotelsCatalogClient({
 
             <label className="grid gap-3">
               <span className="text-sm font-bold uppercase tracking-[0.14em] text-stone-500">
-                Rating
+                {translate("Rating")}
               </span>
               <select
                 className="h-11 rounded-md border border-stone-300 px-3 font-semibold outline-none"
                 onChange={(event) => setMinRating(event.target.value)}
                 value={minRating}
               >
-                <option value="0">Any rating</option>
+                <option value="0">{translate("Any rating")}</option>
                 <option value="4.3">4.3+</option>
                 <option value="4.5">4.5+</option>
                 <option value="4.7">4.7+</option>
@@ -189,7 +191,7 @@ export function HotelsCatalogClient({
 
             <div>
               <p className="text-sm font-bold uppercase tracking-[0.14em] text-stone-500">
-                Amenities
+                {translate("Amenities")}
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
                 {amenityOptions.map((amenity) => (
@@ -211,14 +213,14 @@ export function HotelsCatalogClient({
 
             <label className="grid gap-3">
               <span className="text-sm font-bold uppercase tracking-[0.14em] text-stone-500">
-                Nearby place
+                {translate("Nearby place")}
               </span>
               <select
                 className="h-11 rounded-md border border-stone-300 px-3 font-semibold outline-none"
                 onChange={(event) => setNearby(event.target.value)}
                 value={nearby}
               >
-                <option>All</option>
+                <option value="All">{translate("All")}</option>
                 {nearbyPlaceOptions.map((place) => (
                   <option key={place}>{place}</option>
                 ))}
@@ -231,24 +233,24 @@ export function HotelsCatalogClient({
           <div className="mb-5 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
             <div>
               <p className="text-sm font-bold uppercase tracking-[0.18em] text-[#a66f2d]">
-                {filteredHotels.length} properties
+                {filteredHotels.length} {t("catalog.properties")}
               </p>
-              <h2 className="mt-2 text-2xl font-semibold">Almaty stays</h2>
+              <h2 className="mt-2 text-2xl font-semibold">{translate("Almaty stays")}</h2>
             </div>
             <p className="text-sm font-semibold text-stone-500">
               {publishedHotels.length > 0
-                ? `${publishedHotels.length} approved Supabase listings included.`
-                : "No approved Supabase listings yet."}
+                ? `${publishedHotels.length} ${t("catalog.approvedListingsIncluded")}`
+                : t("catalog.noApprovedListings")}
             </p>
           </div>
           {isUsingDemoHotels && process.env.NODE_ENV === "development" ? (
             <div className="mb-5 rounded-lg border border-[#f0bb67]/50 bg-[#fff8e8] px-5 py-4 text-sm font-semibold text-[#8a5a17]">
-              Showing demo hotels because no published Supabase properties exist yet.
+              {t("catalog.demoNotice")}
             </div>
           ) : null}
           {supabaseError ? (
             <div className="mb-5 rounded-lg border border-[#efc4bd] bg-[#fff0ed] px-5 py-4 text-sm font-semibold text-[#9b2d25]">
-              Supabase published listings could not be loaded: {supabaseError}
+              {t("catalog.supabaseError")} {supabaseError}
             </div>
           ) : null}
 
@@ -263,12 +265,12 @@ export function HotelsCatalogClient({
               <div className="mb-5 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
                 <div>
                   <p className="text-sm font-bold uppercase tracking-[0.18em] text-[#a66f2d]">
-                    Location view
+                    {t("catalog.locationView")}
                   </p>
-                  <h3 className="mt-2 text-2xl font-semibold">Open stays in 2GIS</h3>
+                  <h3 className="mt-2 text-2xl font-semibold">{t("catalog.openStaysIn2Gis")}</h3>
                 </div>
                 <p className="max-w-md text-sm font-semibold text-stone-500">
-                  The MVP uses direct 2GIS links instead of an embedded map.
+                  {t("catalog.twoGisDescription")}
                 </p>
               </div>
               <div className="grid gap-6 md:grid-cols-2">
@@ -281,9 +283,9 @@ export function HotelsCatalogClient({
 
           {filteredHotels.length === 0 ? (
             <div className="rounded-lg border border-stone-200 bg-white p-8 text-center shadow-sm">
-              <h3 className="text-2xl font-semibold">No matches yet</h3>
+              <h3 className="text-2xl font-semibold">{translate("No matches yet")}</h3>
               <p className="mt-3 text-stone-600">
-                Try a lower rating, wider price range, or fewer amenities.
+                {translate("Try a lower rating, wider price range, or fewer amenities.")}
               </p>
             </div>
           ) : null}

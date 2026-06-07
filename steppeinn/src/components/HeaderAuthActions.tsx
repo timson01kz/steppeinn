@@ -5,12 +5,14 @@ import { useEffect, useState } from "react";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 import type { UserRole } from "@/lib/auth/roles";
 import { roleHome } from "@/lib/auth/roles";
+import { useI18n } from "@/i18n";
 
 type HeaderAuthActionsProps = {
   overlay?: boolean;
 };
 
 export function HeaderAuthActions({ overlay = false }: HeaderAuthActionsProps) {
+  const { translate } = useI18n();
   const [role, setRole] = useState<UserRole | null>(null);
   const [isAuthed, setIsAuthed] = useState(false);
 
@@ -61,7 +63,7 @@ export function HeaderAuthActions({ overlay = false }: HeaderAuthActionsProps) {
   if (!isAuthed) {
     return (
       <Link className={buttonClass} href="/login">
-        Login
+        {translate("Login")}
       </Link>
     );
   }
@@ -69,7 +71,7 @@ export function HeaderAuthActions({ overlay = false }: HeaderAuthActionsProps) {
   return (
     <div className="flex items-center gap-2">
       <Link className={buttonClass} href={role ? roleHome[role] : "/dashboard/client"}>
-        Dashboard
+        {translate("Dashboard")}
       </Link>
       <button
         className={`hidden rounded-full px-4 py-2.5 text-sm font-bold md:inline-flex ${
@@ -84,7 +86,7 @@ export function HeaderAuthActions({ overlay = false }: HeaderAuthActionsProps) {
         }}
         type="button"
       >
-        Sign out
+        {translate("Sign out")}
       </button>
     </div>
   );

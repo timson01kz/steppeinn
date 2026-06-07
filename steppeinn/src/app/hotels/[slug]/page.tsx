@@ -7,6 +7,7 @@ import { HotelCard } from "@/components/HotelCard";
 import { SectionTitle } from "@/components/SectionTitle";
 import { hotelDetail, hotelReviews, rooms, similarHotels } from "@/data/hotels";
 import { hotelNearbyPlaces } from "@/data/locations";
+import { getServerI18n } from "@/i18n/server";
 import { createTwoGisLink } from "@/lib/2gis";
 import { getPublishedPropertyDetail } from "@/lib/services/propertyService";
 
@@ -33,6 +34,7 @@ export default async function HotelDetailsPage({
 }: HotelDetailsPageProps) {
   const { slug } = await params;
   const query = await searchParams;
+  const { t } = await getServerI18n();
   const { data: publishedProperty } = await getPublishedPropertyDetail(slug);
   const displayName =
     publishedProperty?.name ??
@@ -270,13 +272,13 @@ export default async function HotelDetailsPage({
 
           <section>
             <SectionTitle
-              description="Open the hotel location in 2GIS for routes, entrances, and nearby city context."
-              eyebrow="Location"
-              title="Plan the area around your stay."
+              description={t("hotelDetail.location.description")}
+              eyebrow={t("hotelDetail.location.eyebrow")}
+              title={t("hotelDetail.location.title")}
             />
             <div className="mt-8 rounded-lg border border-stone-200 bg-white p-6 shadow-sm">
               <p className="text-sm font-bold uppercase tracking-[0.16em] text-stone-500">
-                Address
+                {t("Address")}
               </p>
               <p className="mt-2 text-xl font-semibold">{detail.address}</p>
               <div className="mt-6 grid gap-3 sm:grid-cols-2">
@@ -298,7 +300,7 @@ export default async function HotelDetailsPage({
                 rel="noreferrer"
                 target="_blank"
               >
-                Open in 2GIS
+                {t("Open in 2GIS")}
               </a>
             </div>
           </section>

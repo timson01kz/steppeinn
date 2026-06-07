@@ -1,3 +1,6 @@
+"use client";
+
+import { useI18n } from "@/i18n";
 import type { LocationCardData } from "@/types";
 
 export type { LocationCardData };
@@ -9,6 +12,8 @@ type LocationCardProps = {
 };
 
 export function LocationCard({ location, active, onSelect }: LocationCardProps) {
+  const { translate } = useI18n();
+
   return (
     <button
       className={`group absolute -translate-x-1/2 -translate-y-1/2 text-left transition duration-300 ${
@@ -29,7 +34,9 @@ export function LocationCard({ location, active, onSelect }: LocationCardProps) 
         }`}
       >
         <span className="block text-sm font-bold">{location.name}</span>
-        <span className="mt-1 block text-xs text-stone-600">{location.type}</span>
+        <span className="mt-1 block text-xs text-stone-600">
+          {translate(location.type)}
+        </span>
       </span>
     </button>
   );

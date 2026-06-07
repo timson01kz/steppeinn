@@ -1,12 +1,15 @@
+"use client";
+
 import Link from "next/link";
 import { HeaderAuthActions } from "./HeaderAuthActions";
 import { LanguageSwitcher } from "./LanguageSwitcher";
+import { useI18n } from "@/i18n";
 
 const navItems = [
-  { label: "Hotels", href: "/hotels" },
-  { label: "Map", href: "/map" },
-  { label: "AI Search", href: "/ai-search" },
-  { label: "For hotels", href: "/for-hotels" },
+  { label: "nav.hotels", href: "/hotels" },
+  { label: "nav.map", href: "/map" },
+  { label: "nav.aiSearch", href: "/ai-search" },
+  { label: "nav.forHotels", href: "/for-hotels" },
 ];
 
 type HeaderProps = {
@@ -14,6 +17,8 @@ type HeaderProps = {
 };
 
 export function Header({ overlay = false }: HeaderProps) {
+  const { translate } = useI18n();
+
   return (
     <header
       className={`relative z-20 mx-auto flex w-full max-w-7xl items-center justify-between px-5 py-5 sm:px-8 ${
@@ -40,7 +45,7 @@ export function Header({ overlay = false }: HeaderProps) {
             href={item.href}
             key={item.href}
           >
-            {item.label}
+            {translate(item.label)}
           </Link>
         ))}
       </nav>
