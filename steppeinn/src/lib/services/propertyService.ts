@@ -57,6 +57,8 @@ export type PublicPropertyDetail = {
   amenities: string[];
   photos: PropertyPhoto[];
   rooms: PropertyRoom[];
+  latitude: number | null;
+  longitude: number | null;
 };
 
 export type PropertyRoom = {
@@ -299,7 +301,7 @@ export async function getPublishedPropertyDetail(
     const { data: property, error } = await supabase
       .from("properties")
       .select(
-        "id,name,slug,address,city,property_type,rating,price_from,amenities,description,short_description",
+        "id,name,slug,address,city,property_type,rating,price_from,amenities,description,short_description,latitude,longitude",
       )
       .eq("status", "published")
       .eq("slug", slug)
@@ -344,6 +346,8 @@ export async function getPublishedPropertyDetail(
         amenities: property.amenities,
         photos: mediaByProperty.data.get(property.id) ?? [],
         rooms: roomsByProperty.data.get(property.id) ?? [],
+        latitude: property.latitude,
+        longitude: property.longitude,
       },
       error: null,
     };
@@ -414,6 +418,7 @@ function toCatalogHotel(
     price: `${priceValue.toLocaleString("ru-RU")} KZT`,
     priceValue,
     slug: property.slug,
+    address: property.address || property.city,
     type: normalizePropertyType(property.property_type),
     amenities: property.amenities.length > 0 ? property.amenities : ["Breakfast"],
     nearby: "All",

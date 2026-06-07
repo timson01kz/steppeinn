@@ -7,6 +7,9 @@ export type HotelCardData = {
   distance: string;
   price: string;
   slug: string;
+  address?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
 };
 
 export type PropertyType =
@@ -25,8 +28,6 @@ export type CatalogHotel = HotelCardData & {
   nearby: string;
   mapX: string;
   mapY: string;
-  latitude?: number | null;
-  longitude?: number | null;
 };
 
 export type LocationCardData = {

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { createTwoGisLink } from "@/lib/2gis";
 import type { HotelCardData } from "@/types";
 
 export type { HotelCardData };
@@ -8,6 +9,13 @@ type HotelCardProps = {
 };
 
 export function HotelCard({ hotel }: HotelCardProps) {
+  const twoGisUrl = createTwoGisLink({
+    address: hotel.address ?? hotel.area,
+    latitude: hotel.latitude,
+    longitude: hotel.longitude,
+    name: hotel.name,
+  });
+
   return (
     <article className="group overflow-hidden rounded-lg border border-stone-200 bg-white shadow-[0_22px_70px_rgba(34,28,18,.08)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_28px_90px_rgba(34,28,18,.16)]">
       <div
@@ -33,12 +41,22 @@ export function HotelCard({ hotel }: HotelCardProps) {
           </p>
         </div>
         <p className="mt-4 text-sm font-medium text-stone-600">{hotel.distance}</p>
-        <Link
-          className="mt-5 flex h-11 items-center justify-center rounded-md bg-[#17130f] text-sm font-bold text-white transition group-hover:bg-[#2f4d46]"
-          href={`/hotels/${hotel.slug}`}
-        >
-          View stay
-        </Link>
+        <div className="mt-5 grid gap-2 sm:grid-cols-2">
+          <Link
+            className="flex h-11 items-center justify-center rounded-md bg-[#17130f] text-sm font-bold text-white transition group-hover:bg-[#2f4d46]"
+            href={`/hotels/${hotel.slug}`}
+          >
+            View stay
+          </Link>
+          <a
+            className="flex h-11 items-center justify-center rounded-md border border-stone-300 bg-white text-sm font-bold text-[#2f4d46] transition hover:border-[#2f4d46]"
+            href={twoGisUrl}
+            rel="noreferrer"
+            target="_blank"
+          >
+            Open in 2GIS
+          </a>
+        </div>
       </div>
     </article>
   );
