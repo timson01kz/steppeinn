@@ -105,9 +105,6 @@ export function HomePageClient({
           <div className="absolute inset-x-0 bottom-0 h-[260px] city-panorama-layer" />
           <div className="absolute bottom-0 left-0 right-0 h-56 bg-[linear-gradient(90deg,rgba(23,19,15,.64),rgba(23,19,15,.18),rgba(23,19,15,.54))]" />
         </div>
-        <div className="hero-airplane" aria-hidden="true">
-          <span className="hero-airplane-body" />
-        </div>
         <button
           aria-disabled="true"
           aria-label="Previous city"
