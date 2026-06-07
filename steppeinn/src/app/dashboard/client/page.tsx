@@ -13,7 +13,9 @@ import {
   clientStats,
   supportFaqs,
 } from "@/data/users";
+import { getServerI18n } from "@/i18n/server";
 import { getClientBookingRequests } from "@/lib/services/bookingService";
+import type { DictionaryKey } from "@/i18n";
 
 export const dynamic = "force-dynamic";
 
@@ -24,9 +26,10 @@ const sidebarItems = [
   { label: "Profile", href: "#profile" },
   { label: "Notifications", href: "#notifications" },
   { label: "Support", href: "#support" },
-];
+] satisfies Array<{ label: DictionaryKey; href: string }>;
 
 export default async function ClientDashboardPage() {
+  const { t } = await getServerI18n();
   const { data: bookingRequests, error: bookingRequestsError } =
     await getClientBookingRequests();
   const dashboardStats = clientStats.map((stat) => {
@@ -67,7 +70,7 @@ export default async function ClientDashboardPage() {
             className="rounded-full bg-[#17130f] px-5 py-2.5 text-sm font-bold text-white"
             href="/hotels"
           >
-            Find hotels
+            {t("dashboard.client.findHotels")}
           </Link>
         </div>
       </div>
@@ -75,7 +78,7 @@ export default async function ClientDashboardPage() {
       <div className="mx-auto grid max-w-7xl gap-6 px-5 py-8 sm:px-8 lg:grid-cols-[260px_1fr]">
         <aside className="h-fit rounded-lg border border-stone-200 bg-white p-4 shadow-sm lg:sticky lg:top-6">
           <p className="px-3 text-xs font-bold uppercase tracking-[0.18em] text-[#a66f2d]">
-            Client dashboard
+            {t("Client dashboard")}
           </p>
           <nav className="mt-4 grid gap-1">
             {sidebarItems.map((item) => (
@@ -84,15 +87,14 @@ export default async function ClientDashboardPage() {
                 href={item.href}
                 key={item.href}
               >
-                {item.label}
+                {t(item.label)}
               </a>
             ))}
           </nav>
           <div className="mt-6 rounded-lg bg-[#17130f] p-4 text-white">
-            <p className="text-sm font-bold">Mock account</p>
+            <p className="text-sm font-bold">{t("Mock account")}</p>
             <p className="mt-2 text-sm leading-6 text-white/62">
-              Booking requests are loaded from Supabase. Favorites, profile, and
-              support messages are local mock content.
+              {t("dashboard.client.mockDescription")}
             </p>
           </div>
         </aside>
@@ -103,19 +105,20 @@ export default async function ClientDashboardPage() {
             id="overview"
           >
             <p className="text-sm font-bold uppercase tracking-[0.2em] text-[#f0bb67]">
-              Overview
+              {t("Overview")}
             </p>
             <h1 className="mt-3 text-4xl font-semibold sm:text-6xl">
-              Your Almaty trips.
+              {t("Your Almaty trips.")}
             </h1>
             <p className="mt-4 max-w-3xl leading-7 text-white/68">
-              Track booking requests, saved hotels, profile preferences, and
-              support messages in one client workspace.
+              {t("dashboard.client.overviewDescription")}
             </p>
             <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
               {dashboardStats.map((stat) => (
                 <article className="rounded-lg border border-white/12 bg-white/10 p-5" key={stat.label}>
-                  <p className="text-sm font-semibold text-white/62">{stat.label}</p>
+                  <p className="text-sm font-semibold text-white/62">
+                    {t(stat.label as DictionaryKey)}
+                  </p>
                   <p className="mt-3 text-3xl font-semibold">{stat.value}</p>
                 </article>
               ))}
@@ -126,7 +129,7 @@ export default async function ClientDashboardPage() {
             <SectionHeader eyebrow="My bookings" title="Requests and stays" />
             {bookingRequestsError ? (
               <div className="mt-6 rounded-lg border border-[#efc4bd] bg-[#fff0ed] px-5 py-4 text-sm font-semibold text-[#9b2d25]">
-                Supabase booking requests could not be loaded: {bookingRequestsError}
+                {t("dashboard.client.bookingsError")} {bookingRequestsError}
               </div>
             ) : null}
             <div className="mt-6 grid gap-4">
@@ -150,16 +153,16 @@ export default async function ClientDashboardPage() {
                   <div className="grid gap-2">
                     {booking.responseMessage ? (
                       <p className="rounded-md bg-white px-4 py-3 text-sm font-semibold text-stone-700">
-                        Hotel response: {booking.responseMessage}
+                        {t("Hotel response:")} {booking.responseMessage}
                       </p>
                     ) : (
                       <p className="rounded-md bg-white px-4 py-3 text-sm font-semibold text-stone-600">
-                        Awaiting hotel response.
+                        {t("Awaiting hotel response.")}
                       </p>
                     )}
                     {booking.specialRequests ? (
                       <p className="text-sm text-stone-600">
-                        Request: {booking.specialRequests}
+                        {t("Request:")} {booking.specialRequests}
                       </p>
                     ) : null}
                   </div>
@@ -167,8 +170,7 @@ export default async function ClientDashboardPage() {
               ))}
               {bookingRequests.length === 0 ? (
                 <p className="rounded-lg border border-dashed border-stone-300 bg-[#fbf8f1] p-5 text-sm font-semibold text-stone-600">
-                  No Supabase booking requests yet. Send a request from a
-                  published hotel page.
+                  {t("dashboard.client.noBookings")}
                 </p>
               ) : null}
             </div>
@@ -178,7 +180,7 @@ export default async function ClientDashboardPage() {
             <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
               <SectionHeader eyebrow="Favorites" title="Saved hotels" />
               <Link className="font-bold text-[#2f4d46]" href="/hotels">
-                Explore more
+                {t("dashboard.client.exploreMore")}
               </Link>
             </div>
             <div className="mt-6 grid gap-6 md:grid-cols-3">
@@ -189,7 +191,7 @@ export default async function ClientDashboardPage() {
                     className="h-11 rounded-md border border-stone-300 bg-white text-sm font-bold"
                     type="button"
                   >
-                    Remove from favorites
+                    {t("dashboard.client.removeFavorite")}
                   </button>
                 </div>
               ))}
@@ -201,7 +203,7 @@ export default async function ClientDashboardPage() {
             <div className="mt-6 grid gap-4 md:grid-cols-2">
               {clientProfile.map((item) => (
                 <label className="grid gap-2 text-sm font-bold" key={item.label}>
-                  {item.label}
+                  {t(item.label as DictionaryKey)}
                   <input
                     className="h-12 rounded-md border border-stone-300 bg-[#fbf8f1] px-4 font-normal outline-none"
                     defaultValue={item.value}
@@ -210,7 +212,7 @@ export default async function ClientDashboardPage() {
               ))}
             </div>
             <button className="mt-6 rounded-md bg-[#17130f] px-5 py-3 font-bold text-white" type="button">
-              Save mock profile
+              {t("dashboard.client.saveMockProfile")}
             </button>
           </section>
 
@@ -220,9 +222,11 @@ export default async function ClientDashboardPage() {
               {clientNotifications.map((notification) => (
                 <article className="rounded-lg border border-stone-200 bg-[#fbf8f1] p-5" key={notification.type}>
                   <p className="text-sm font-bold uppercase tracking-[0.16em] text-[#a66f2d]">
-                    {notification.type}
+                    {t(notification.type as DictionaryKey)}
                   </p>
-                  <p className="mt-3 leading-7 text-stone-700">{notification.text}</p>
+                  <p className="mt-3 leading-7 text-stone-700">
+                    {t(notification.text as DictionaryKey)}
+                  </p>
                 </article>
               ))}
             </div>
@@ -233,26 +237,26 @@ export default async function ClientDashboardPage() {
             <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_.9fr]">
               <form className="grid gap-4 rounded-lg bg-[#fbf8f1] p-5">
                 <label className="grid gap-2 text-sm font-bold">
-                  Subject
+                  {t("dashboard.client.supportSubject")}
                   <input className="h-12 rounded-md border border-stone-300 px-4 font-normal outline-none" />
                 </label>
                 <label className="grid gap-2 text-sm font-bold">
-                  Message
+                  {t("dashboard.client.supportMessage")}
                   <textarea
                     className="min-h-36 rounded-md border border-stone-300 p-4 font-normal outline-none"
-                    placeholder="Tell SteppeInn support what happened"
+                    placeholder={t("dashboard.client.supportPlaceholder")}
                   />
                 </label>
                 <button className="h-12 rounded-md bg-[#17130f] font-bold text-white" type="button">
-                  Send support request
+                  {t("dashboard.client.sendSupportRequest")}
                 </button>
               </form>
               <div className="grid gap-3">
                 {supportFaqs.map((faq) => (
                   <article className="rounded-lg border border-stone-200 bg-[#fbf8f1] p-5" key={faq}>
-                    <h3 className="font-semibold">{faq}</h3>
+                    <h3 className="font-semibold">{t(faq as DictionaryKey)}</h3>
                     <p className="mt-2 text-sm leading-6 text-stone-600">
-                      Placeholder answer for the MVP support knowledge base.
+                      {t("dashboard.client.faqPlaceholder")}
                     </p>
                   </article>
                 ))}
