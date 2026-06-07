@@ -101,9 +101,6 @@ export function HomePageClient({
       >
         <div className="absolute inset-0">
           <div className="hero-ambient" />
-          <div className="absolute inset-x-0 bottom-0 h-[470px] mountain-layer" />
-          <div className="absolute inset-x-0 bottom-0 h-[260px] city-panorama-layer" />
-          <div className="absolute bottom-0 left-0 right-0 h-56 bg-[linear-gradient(90deg,rgba(23,19,15,.64),rgba(23,19,15,.18),rgba(23,19,15,.54))]" />
         </div>
         <button
           aria-disabled="true"
