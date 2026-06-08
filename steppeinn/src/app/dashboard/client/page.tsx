@@ -8,10 +8,11 @@ import {
 import { HotelCard } from "@/components/HotelCard";
 import { favoriteHotels } from "@/data/hotels";
 import {
+  clientCountries,
   clientNotifications,
   clientProfile,
   clientStats,
-  supportFaqs,
+  clientSupportRequests,
 } from "@/data/users";
 import { getServerI18n } from "@/i18n/server";
 import { getClientBookingRequests } from "@/lib/services/bookingService";
@@ -27,6 +28,8 @@ const sidebarItems = [
   { label: "Notifications", href: "#notifications" },
   { label: "Support", href: "#support" },
 ] satisfies Array<{ label: DictionaryKey; href: string }>;
+
+const languageOptions = ["EN", "RU", "KZ"];
 
 export default async function ClientDashboardPage() {
   const { t } = await getServerI18n();
@@ -91,12 +94,6 @@ export default async function ClientDashboardPage() {
               </a>
             ))}
           </nav>
-          <div className="mt-6 rounded-lg bg-[#17130f] p-4 text-white">
-            <p className="text-sm font-bold">{t("Mock account")}</p>
-            <p className="mt-2 text-sm leading-6 text-white/62">
-              {t("dashboard.client.mockDescription")}
-            </p>
-          </div>
         </aside>
 
         <div className="grid gap-8">
@@ -210,9 +207,35 @@ export default async function ClientDashboardPage() {
                   />
                 </label>
               ))}
+              <label className="grid gap-2 text-sm font-bold">
+                {t("Preferred language")}
+                <select
+                  className="h-12 rounded-md border border-stone-300 bg-[#fbf8f1] px-4 font-normal outline-none"
+                  defaultValue="RU"
+                >
+                  {languageOptions.map((language) => (
+                    <option key={language} value={language}>
+                      {language}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="grid gap-2 text-sm font-bold">
+                {t("Country")}
+                <select
+                  className="h-12 rounded-md border border-stone-300 bg-[#fbf8f1] px-4 font-normal outline-none"
+                  defaultValue="Kazakhstan"
+                >
+                  {clientCountries.map((country) => (
+                    <option key={country} value={country}>
+                      {t(country as DictionaryKey)}
+                    </option>
+                  ))}
+                </select>
+              </label>
             </div>
             <button className="mt-6 rounded-md bg-[#17130f] px-5 py-3 font-bold text-white" type="button">
-              {t("dashboard.client.saveMockProfile")}
+              {t("dashboard.client.saveProfile")}
             </button>
           </section>
 
@@ -252,11 +275,20 @@ export default async function ClientDashboardPage() {
                 </button>
               </form>
               <div className="grid gap-3">
-                {supportFaqs.map((faq) => (
-                  <article className="rounded-lg border border-stone-200 bg-[#fbf8f1] p-5" key={faq}>
-                    <h3 className="font-semibold">{t(faq as DictionaryKey)}</h3>
-                    <p className="mt-2 text-sm leading-6 text-stone-600">
-                      {t("dashboard.client.faqPlaceholder")}
+                <h3 className="text-xl font-semibold">{t("dashboard.client.sentSupportRequests")}</h3>
+                {clientSupportRequests.map((request) => (
+                  <article className="rounded-lg border border-stone-200 bg-[#fbf8f1] p-5" key={`${request.topic}-${request.createdDate}`}>
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <h4 className="font-semibold">{t(request.topic as DictionaryKey)}</h4>
+                      <span className="rounded-full bg-white px-3 py-1 text-xs font-bold uppercase tracking-[0.12em] text-[#2f4d46]">
+                        {t(request.status as DictionaryKey)}
+                      </span>
+                    </div>
+                    <p className="mt-3 text-sm leading-6 text-stone-600">
+                      {t(request.messagePreview as DictionaryKey)}
+                    </p>
+                    <p className="mt-4 text-xs font-bold uppercase tracking-[0.14em] text-stone-500">
+                      {request.createdDate}
                     </p>
                   </article>
                 ))}

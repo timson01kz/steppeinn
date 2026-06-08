@@ -11,22 +11,50 @@ export const clientProfile = [
   { label: "Full name", value: "Aigerim Saparova" },
   { label: "Phone", value: "+7 701 000 00 00" },
   { label: "Email", value: "aigerim@example.com" },
-  { label: "Preferred language", value: "RU" },
-  { label: "City / country", value: "Almaty, Kazakhstan" },
+];
+
+export const clientCountries = [
+  "Kazakhstan",
+  "Uzbekistan",
+  "Kyrgyzstan",
+  "Russia",
+  "UAE",
+  "Turkey",
+  "China",
+  "India",
+  "Germany",
+  "France",
+  "UK",
+  "USA",
+  "Other",
 ];
 
 export const clientNotifications = [
   { type: "Booking confirmed", text: "Medeu Alpine Rooms confirmed your June stay." },
   { type: "Booking declined", text: "Esentai Urban Hotel is unavailable for selected dates." },
   { type: "Hotel message", text: "Kok-Tobe Skyline Residence asked about arrival time." },
-  { type: "Promo offer", text: "Weekend mountain stays are 10% off in mock mode." },
+  { type: "Promo offer", text: "Weekend mountain stays are 10% off this week." },
 ];
 
-export const supportFaqs = [
-  "How soon will the hotel reply?",
-  "Can I cancel a pending request?",
-  "How do I contact a hotel?",
-  "When will online payment be available?",
+export const clientSupportRequests = [
+  {
+    topic: "Arrival time question",
+    messagePreview: "I want to confirm whether late check-in is possible.",
+    status: "sent",
+    createdDate: "08 Jun 2026",
+  },
+  {
+    topic: "Change guest count",
+    messagePreview: "Please update my request from two guests to three guests.",
+    status: "in review",
+    createdDate: "07 Jun 2026",
+  },
+  {
+    topic: "Hotel contact",
+    messagePreview: "I need help reaching the hotel before arrival.",
+    status: "answered",
+    createdDate: "05 Jun 2026",
+  },
 ];
 
 export const ownerMetrics = [
