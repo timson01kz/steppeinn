@@ -1,19 +1,33 @@
 import { createBrowserClient } from "@supabase/ssr";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "./types";
 
-function requireEnv(name: string) {
-  const value = process.env[name];
+let warnedAboutMissingEnv = false;
 
-  if (!value) {
-    throw new Error(`Missing required environment variable: ${name}`);
+function readPublicSupabaseEnv() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (supabaseUrl && supabaseAnonKey) {
+    return { supabaseUrl, supabaseAnonKey };
   }
 
-  return value;
+  if (process.env.NODE_ENV !== "production" && !warnedAboutMissingEnv) {
+    warnedAboutMissingEnv = true;
+    console.warn(
+      "[supabase] Browser auth client unavailable: NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY is missing.",
+    );
+  }
+
+  return null;
 }
 
-export function createBrowserSupabaseClient() {
-  const supabaseUrl = requireEnv("NEXT_PUBLIC_SUPABASE_URL");
-  const supabaseAnonKey = requireEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY");
+export function createBrowserSupabaseClient(): SupabaseClient<Database> | null {
+  const env = readPublicSupabaseEnv();
 
-  return createBrowserClient<Database>(supabaseUrl, supabaseAnonKey);
+  if (!env) {
+    return null;
+  }
+
+  return createBrowserClient<Database>(env.supabaseUrl, env.supabaseAnonKey);
 }
