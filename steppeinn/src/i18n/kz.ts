@@ -119,6 +119,7 @@ export const kz: Record<keyof typeof en, string> = {
   "Request:": "Өтінім:",
   "Client dashboard": "Клиент кабинеті",
   "Overview": "Шолу",
+  "My dashboard": "Менің кабинетім",
   "My bookings": "Менің өтінімдерім",
   "Favorites": "Таңдаулылар",
   "Profile": "Профиль",

@@ -119,6 +119,7 @@ export const ru: Record<keyof typeof en, string> = {
   "Request:": "Запрос:",
   "Client dashboard": "Кабинет клиента",
   "Overview": "Обзор",
+  "My dashboard": "Мой кабинет",
   "My bookings": "Мои заявки",
   "Favorites": "Избранное",
   "Profile": "Профиль",

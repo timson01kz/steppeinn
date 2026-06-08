@@ -15,6 +15,7 @@ import {
   clientSupportRequests,
 } from "@/data/users";
 import { getServerI18n } from "@/i18n/server";
+import { signOutAction } from "@/lib/auth/actions";
 import { getClientBookingRequests } from "@/lib/services/bookingService";
 import type { DictionaryKey } from "@/i18n";
 
@@ -69,12 +70,22 @@ export default async function ClientDashboardPage() {
               SteppeInn
             </span>
           </Link>
-          <Link
-            className="rounded-full bg-[#17130f] px-5 py-2.5 text-sm font-bold text-white"
-            href="/hotels"
-          >
-            {t("dashboard.client.findHotels")}
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link
+              className="rounded-full bg-[#17130f] px-5 py-2.5 text-sm font-bold text-white"
+              href="/hotels"
+            >
+              {t("dashboard.client.findHotels")}
+            </Link>
+            <form action={signOutAction}>
+              <button
+                className="rounded-full border border-stone-300 px-5 py-2.5 text-sm font-bold text-[#17130f]"
+                type="submit"
+              >
+                {t("Sign out")}
+              </button>
+            </form>
+          </div>
         </div>
       </div>
 

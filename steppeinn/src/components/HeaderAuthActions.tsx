@@ -11,10 +11,15 @@ type HeaderAuthActionsProps = {
   overlay?: boolean;
 };
 
+type HeaderAccount = {
+  displayName: string;
+  role: UserRole;
+};
+
 export function HeaderAuthActions({ overlay = false }: HeaderAuthActionsProps) {
   const { translate } = useI18n();
-  const [role, setRole] = useState<UserRole | null>(null);
-  const [isAuthed, setIsAuthed] = useState(false);
+  const [account, setAccount] = useState<HeaderAccount | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     let active = true;
@@ -24,33 +29,50 @@ export function HeaderAuthActions({ overlay = false }: HeaderAuthActionsProps) {
         const supabase = createBrowserSupabaseClient();
         const { data } = await supabase.auth.getUser();
 
-        if (!active || !data.user) {
+        if (!active) {
           return;
         }
 
-        setIsAuthed(true);
+        if (!data.user) {
+          setAccount(null);
+          setIsLoading(false);
+          return;
+        }
 
         const { data: profile } = await supabase
           .from("profiles")
-          .select("role")
+          .select("full_name, role")
           .eq("id", data.user.id)
           .single();
 
         if (active) {
-          setRole(profile?.role ?? "client");
+          const emailPrefix = data.user.email?.split("@")[0] ?? "Account";
+          setAccount({
+            displayName: profile?.full_name?.trim() || emailPrefix,
+            role: profile?.role ?? "client",
+          });
+          setIsLoading(false);
         }
       } catch {
         if (active) {
-          setIsAuthed(false);
-          setRole(null);
+          setAccount(null);
+          setIsLoading(false);
         }
       }
     }
 
     loadUser();
 
+    const supabase = createBrowserSupabaseClient();
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(() => {
+      loadUser();
+    });
+
     return () => {
       active = false;
+      subscription.unsubscribe();
     };
   }, []);
 
@@ -60,7 +82,18 @@ export function HeaderAuthActions({ overlay = false }: HeaderAuthActionsProps) {
       : "bg-[#17130f] text-white hover:bg-[#2f4d46]"
   }`;
 
-  if (!isAuthed) {
+  if (isLoading) {
+    return (
+      <span
+        className={`inline-flex h-10 w-24 rounded-full ${
+          overlay ? "bg-white/18" : "bg-stone-200"
+        }`}
+        aria-hidden="true"
+      />
+    );
+  }
+
+  if (!account) {
     return (
       <Link className={buttonClass} href="/login">
         {translate("Login")}
@@ -68,26 +101,47 @@ export function HeaderAuthActions({ overlay = false }: HeaderAuthActionsProps) {
     );
   }
 
+  const dashboardHref = roleHome[account.role];
+
   return (
-    <div className="flex items-center gap-2">
-      <Link className={buttonClass} href={role ? roleHome[role] : "/dashboard/client"}>
-        {translate("Dashboard")}
-      </Link>
-      <button
-        className={`hidden rounded-full px-4 py-2.5 text-sm font-bold md:inline-flex ${
+    <details className="group relative">
+      <summary className={`${buttonClass} flex cursor-pointer list-none items-center gap-2`}>
+        <span className="max-w-32 truncate sm:max-w-44">{account.displayName}</span>
+        <span aria-hidden="true" className="text-xs">▾</span>
+      </summary>
+      <div
+        className={`absolute right-0 mt-3 w-56 rounded-lg border p-2 text-sm font-semibold shadow-[0_24px_70px_rgba(23,19,15,.18)] ${
           overlay
-            ? "border border-white/35 text-white"
-            : "border border-stone-300 text-[#17130f]"
+            ? "border-white/20 bg-[#17130f] text-white"
+            : "border-stone-200 bg-white text-[#17130f]"
         }`}
-        onClick={async () => {
-          const supabase = createBrowserSupabaseClient();
-          await supabase.auth.signOut();
-          window.location.assign("/");
-        }}
-        type="button"
       >
-        {translate("Sign out")}
-      </button>
-    </div>
+        <HeaderMenuLink href={dashboardHref} label={translate("My dashboard")} />
+        <HeaderMenuLink href="/dashboard/client#bookings" label={translate("My bookings")} />
+        <HeaderMenuLink href="/dashboard/client#favorites" label={translate("Favorites")} />
+        <HeaderMenuLink href="/dashboard/client#profile" label={translate("Profile")} />
+        <button
+          className={`mt-1 w-full rounded-md px-3 py-2 text-left transition ${
+            overlay ? "hover:bg-white/10" : "hover:bg-[#f6f3ed]"
+          }`}
+          onClick={async () => {
+            const supabase = createBrowserSupabaseClient();
+            await supabase.auth.signOut();
+            window.location.assign("/");
+          }}
+          type="button"
+        >
+          {translate("Sign out")}
+        </button>
+      </div>
+    </details>
+  );
+}
+
+function HeaderMenuLink({ href, label }: { href: string; label: string }) {
+  return (
+    <Link className="block rounded-md px-3 py-2 transition hover:bg-[#f6f3ed] hover:text-[#17130f]" href={href}>
+      {label}
+    </Link>
   );
 }
