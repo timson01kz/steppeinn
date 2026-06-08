@@ -27,6 +27,15 @@ export function HeaderAuthActions({ overlay = false }: HeaderAuthActionsProps) {
     async function loadUser() {
       try {
         const supabase = createBrowserSupabaseClient();
+
+        if (!supabase) {
+          if (active) {
+            setAccount(null);
+            setIsLoading(false);
+          }
+          return;
+        }
+
         const { data } = await supabase.auth.getUser();
 
         if (!active) {
@@ -64,15 +73,15 @@ export function HeaderAuthActions({ overlay = false }: HeaderAuthActionsProps) {
     loadUser();
 
     const supabase = createBrowserSupabaseClient();
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(() => {
-      loadUser();
-    });
+    const subscription = supabase
+      ? supabase.auth.onAuthStateChange(() => {
+          loadUser();
+        }).data.subscription
+      : null;
 
     return () => {
       active = false;
-      subscription.unsubscribe();
+      subscription?.unsubscribe();
     };
   }, []);
 
@@ -126,7 +135,7 @@ export function HeaderAuthActions({ overlay = false }: HeaderAuthActionsProps) {
           }`}
           onClick={async () => {
             const supabase = createBrowserSupabaseClient();
-            await supabase.auth.signOut();
+            await supabase?.auth.signOut();
             window.location.assign("/");
           }}
           type="button"
