@@ -15,15 +15,14 @@ function getRequiredRole(pathname: string) {
 
 export async function middleware(request: NextRequest) {
   const requiredRole = getRequiredRole(request.nextUrl.pathname);
-
-  if (!requiredRole) {
-    return NextResponse.next();
-  }
-
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   if (!supabaseUrl || !supabaseAnonKey) {
+    if (!requiredRole) {
+      return NextResponse.next();
+    }
+
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = "/login";
     loginUrl.searchParams.set("error", "Supabase environment variables are missing.");
@@ -56,6 +55,10 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
+  if (!requiredRole) {
+    return response;
+  }
+
   if (!user) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = "/login";
@@ -82,5 +85,7 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/client/:path*", "/dashboard/owner/:path*", "/admin/:path*"],
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|images|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+  ],
 };

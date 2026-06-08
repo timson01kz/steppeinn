@@ -117,6 +117,7 @@
   "Request:": "Request:",
   "Client dashboard": "Client dashboard",
   "Overview": "Overview",
+  "My dashboard": "My dashboard",
   "My bookings": "My bookings",
   "Favorites": "Favorites",
   "Profile": "Profile",
