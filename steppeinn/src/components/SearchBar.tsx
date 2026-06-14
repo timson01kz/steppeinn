@@ -20,6 +20,11 @@ const guestCategories = [
   { key: "toddlers", label: "search.guests.childrenUnder3" },
 ] satisfies Array<{ key: GuestKey; label: DictionaryKey }>;
 
+const fieldLabelClass =
+  "grid gap-2 font-[Arial,sans-serif] text-xs font-bold uppercase tracking-[0.14em] text-white/78";
+const fieldControlClass =
+  "h-14 rounded-md border border-white/40 bg-white/92 px-4 font-[Arial,sans-serif] text-base font-semibold text-[#17130f] outline-none transition focus:border-white";
+
 export function SearchBar() {
   const { locale, t } = useI18n();
   const checkInRef = useRef<HTMLInputElement>(null);
@@ -38,6 +43,7 @@ export function SearchBar() {
   function updateGuests(key: GuestKey, direction: 1 | -1) {
     setGuests((current) => {
       const minimum = key === "adults" ? 1 : 0;
+
       return {
         ...current,
         [key]: Math.max(minimum, current[key] + direction),
@@ -56,14 +62,11 @@ export function SearchBar() {
       : `${guests.adults} ${adultLabel}`;
 
   return (
-    <form className="glass-panel animate-rise grid gap-4 p-4 sm:p-5">
+    <form className="glass-panel animate-rise grid gap-4 p-4 font-[Arial,sans-serif] sm:p-5">
       <div className="grid gap-3 lg:grid-cols-[1.1fr_.9fr_.9fr_1fr_auto]">
-        <label className="grid gap-2 text-xs font-bold uppercase tracking-[0.14em] text-white/78">
+        <label className={fieldLabelClass}>
           {t("search.destination")}
-          <select
-            className="h-14 rounded-md border border-white/40 bg-white/92 px-4 text-base font-semibold text-[#17130f] outline-none transition focus:border-white"
-            defaultValue="Almaty"
-          >
+          <select className={fieldControlClass} defaultValue="Almaty">
             {cityOptions.map((city) => (
               <option key={city.value} value={city.value}>
                 {t(city.key)}
@@ -83,17 +86,19 @@ export function SearchBar() {
           onOpen={() => openDatePicker(checkOutRef.current)}
         />
 
-        <div className="relative grid gap-2 text-xs font-bold uppercase tracking-[0.14em] text-white/78">
+        <div className={`relative ${fieldLabelClass}`}>
           {t("search.guests")}
           <details className="group">
-            <summary className="flex h-14 cursor-pointer list-none items-center justify-between rounded-md border border-white/40 bg-white/92 px-4 text-base font-semibold normal-case tracking-normal text-[#17130f] outline-none transition focus-visible:ring-2 focus-visible:ring-white">
+            <summary className="flex h-14 cursor-pointer list-none items-center justify-between rounded-md border border-white/40 bg-white/92 px-4 font-[Arial,sans-serif] text-base font-semibold normal-case tracking-normal text-[#17130f] outline-none transition focus-visible:ring-2 focus-visible:ring-white">
               <span>{guestSummary}</span>
-              <span aria-hidden="true" className="text-sm text-stone-500">▾</span>
+              <span aria-hidden="true" className="text-sm text-stone-500">
+                v
+              </span>
             </summary>
             <div className="absolute left-0 right-0 z-30 mt-2 grid gap-3 rounded-lg border border-white/50 bg-white p-4 text-[#17130f] shadow-[0_24px_70px_rgba(23,19,15,.22)]">
               {guestCategories.map((category) => (
                 <div className="flex items-center justify-between gap-4" key={category.key}>
-                  <span className="text-sm font-bold normal-case tracking-normal">
+                  <span className="font-[Arial,sans-serif] text-sm font-bold normal-case tracking-normal">
                     {t(category.label)}
                   </span>
                   <div className="flex items-center gap-3">
@@ -106,7 +111,7 @@ export function SearchBar() {
                     >
                       -
                     </button>
-                    <span className="w-5 text-center text-base font-bold">
+                    <span className="w-5 text-center font-[Arial,sans-serif] text-base font-bold">
                       {guests[category.key]}
                     </span>
                     <button
@@ -126,7 +131,7 @@ export function SearchBar() {
 
         <div className="flex items-end">
           <Link
-            className="flex h-14 w-full items-center justify-center rounded-md bg-[#f0bb67] px-6 text-sm font-black uppercase tracking-[0.08em] text-[#17130f] shadow-xl transition hover:-translate-y-0.5 hover:bg-[#ffd189]"
+            className="flex h-14 w-full items-center justify-center rounded-md bg-[#f0bb67] px-6 font-[Arial,sans-serif] text-sm font-black uppercase tracking-[0.08em] text-[#17130f] shadow-xl transition hover:-translate-y-0.5 hover:bg-[#ffd189]"
             href="/hotels"
           >
             {t("common.search")}
@@ -134,20 +139,21 @@ export function SearchBar() {
         </div>
       </div>
 
-      <div className="rounded-lg border border-white/35 bg-white/14 p-4 shadow-inner backdrop-blur-xl">
+      <div className="rounded-lg border border-white/25 bg-[#17130f]/42 p-3 shadow-[inset_0_1px_0_rgb(255_255_255_/_16%),0_18px_60px_rgb(23_19_15_/_18%)] backdrop-blur-2xl">
         <p
-          className="typing-effect max-w-4xl text-sm font-semibold leading-6 text-white sm:text-base"
+          className="typing-effect max-w-4xl font-[Arial,sans-serif] text-sm font-semibold leading-6 text-white/92"
           key={locale}
         >
           {t("home.aiAssistant.prompt")}
         </p>
-        <div className="mt-4 grid gap-3 md:grid-cols-[1fr_auto]">
-          <textarea
-            className="min-h-24 rounded-md border border-white/40 bg-white/92 px-4 py-3 text-base font-semibold text-[#17130f] outline-none transition placeholder:text-stone-500 focus:border-white"
+        <div className="mt-3 grid gap-3 md:grid-cols-[1fr_auto]">
+          <input
+            className="h-12 rounded-md border border-white/35 bg-white/90 px-4 font-[Arial,sans-serif] text-sm font-semibold text-[#17130f] outline-none transition placeholder:text-stone-500 focus:border-white"
             placeholder={t("home.aiAssistant.placeholder")}
+            type="text"
           />
           <Link
-            className="flex h-12 items-center justify-center rounded-md bg-white px-6 text-sm font-black uppercase tracking-[0.08em] text-[#2f4d46] transition hover:-translate-y-0.5 hover:bg-[#f4ead9] md:h-full"
+            className="flex h-12 items-center justify-center rounded-md bg-white px-6 font-[Arial,sans-serif] text-sm font-black uppercase tracking-[0.08em] text-[#2f4d46] transition hover:-translate-y-0.5 hover:bg-[#f4ead9]"
             href="/ai-search"
           >
             {t("home.aiAssistant.cta")}
@@ -168,10 +174,10 @@ function DateField({
   onOpen: () => void;
 }) {
   return (
-    <label className="grid gap-2 text-xs font-bold uppercase tracking-[0.14em] text-white/78">
+    <label className={fieldLabelClass}>
       {label}
       <input
-        className="h-14 cursor-pointer rounded-md border border-white/40 bg-white/92 px-4 text-base font-semibold text-[#17130f] outline-none transition focus:border-white"
+        className={`${fieldControlClass} cursor-pointer`}
         onClick={onOpen}
         onFocus={onOpen}
         placeholder="dd.mm.yyyy"
