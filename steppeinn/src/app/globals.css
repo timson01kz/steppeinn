@@ -96,6 +96,24 @@ select {
   animation: rise 700ms ease-out both;
 }
 
+.typing-effect {
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+  animation: typing-reveal 3.2s steps(62, end) both;
+}
+
+.typing-effect::after {
+  content: "";
+  display: inline-block;
+  width: 2px;
+  height: 1.15em;
+  margin-left: 4px;
+  background: currentColor;
+  vertical-align: -0.18em;
+  animation: typing-caret 900ms steps(1, end) infinite;
+}
+
 @keyframes rise {
   from {
     opacity: 0;
@@ -105,5 +123,21 @@ select {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes typing-reveal {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@keyframes typing-caret {
+  50% {
+    opacity: 0;
   }
 }

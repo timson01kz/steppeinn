@@ -6,9 +6,7 @@ import { LanguageSwitcher } from "./LanguageSwitcher";
 import { useI18n } from "@/i18n";
 
 const navItems = [
-  { label: "nav.hotels", href: "/hotels" },
   { label: "nav.map", href: "/map" },
-  { label: "nav.aiSearch", href: "/ai-search" },
   { label: "nav.forHotels", href: "/for-hotels" },
 ];
 
