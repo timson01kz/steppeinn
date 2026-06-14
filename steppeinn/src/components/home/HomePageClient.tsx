@@ -125,10 +125,9 @@ export function HomePageClient({
 
         <div className="relative z-10 mx-auto flex min-h-[760px] w-full max-w-7xl flex-col justify-center px-5 pb-20 pt-10 sm:px-8">
           <div className="animate-rise max-w-5xl text-white">
-            <p className="mb-5 inline-flex rounded-full border border-white/35 bg-white/15 px-4 py-2 text-sm font-semibold shadow-sm backdrop-blur-xl">
-              {t(isDay ? "home.hero.badge.day" : "home.hero.badge.night")} /{" "}
-              {t("home.hero.localHour")}{" "}
-              {almatyHour}:00
+            <p className="mb-5 inline-flex rounded-full border border-white/35 bg-white/15 px-4 py-2 font-[Arial,sans-serif] text-sm font-semibold shadow-sm backdrop-blur-xl">
+              {t("home.hero.city")} • {t("home.hero.localTime")} {almatyHour}:00 •{" "}
+              {t("home.hero.weather")}
             </p>
             <h1 className="max-w-5xl text-5xl font-semibold leading-[0.94] sm:text-7xl lg:text-8xl">
               {t("home.hero.title")}
