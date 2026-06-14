@@ -1,55 +1,183 @@
 "use client";
 
 import Link from "next/link";
+import type { RefObject } from "react";
+import { useRef, useState } from "react";
 import { useI18n } from "@/i18n";
+import type { DictionaryKey } from "@/i18n";
+
+type GuestKey = "adults" | "children" | "toddlers";
+
+const cityOptions = [
+  { key: "search.city.almaty", value: "Almaty" },
+  { key: "search.city.astana", value: "Astana" },
+  { key: "search.city.shymkent", value: "Shymkent" },
+] satisfies Array<{ key: DictionaryKey; value: string }>;
+
+const guestCategories = [
+  { key: "adults", label: "search.guests.adults" },
+  { key: "children", label: "search.guests.childrenFrom3" },
+  { key: "toddlers", label: "search.guests.childrenUnder3" },
+] satisfies Array<{ key: GuestKey; label: DictionaryKey }>;
 
 export function SearchBar() {
-  const { t } = useI18n();
+  const { locale, t } = useI18n();
+  const checkInRef = useRef<HTMLInputElement>(null);
+  const checkOutRef = useRef<HTMLInputElement>(null);
+  const [guests, setGuests] = useState<Record<GuestKey, number>>({
+    adults: 2,
+    children: 0,
+    toddlers: 0,
+  });
+
+  function openDatePicker(input: HTMLInputElement | null) {
+    input?.focus();
+    input?.showPicker?.();
+  }
+
+  function updateGuests(key: GuestKey, direction: 1 | -1) {
+    setGuests((current) => {
+      const minimum = key === "adults" ? 1 : 0;
+      return {
+        ...current,
+        [key]: Math.max(minimum, current[key] + direction),
+      };
+    });
+  }
+
+  const childCount = guests.children + guests.toddlers;
+  const adultLabel =
+    guests.adults === 1 ? t("search.guests.adultOne") : t("search.guests.adultMany");
+  const childLabel =
+    childCount === 1 ? t("search.guests.childOne") : t("search.guests.childMany");
+  const guestSummary =
+    childCount > 0
+      ? `${guests.adults} ${adultLabel}, ${childCount} ${childLabel}`
+      : `${guests.adults} ${adultLabel}`;
 
   return (
     <form className="glass-panel animate-rise grid gap-4 p-4 sm:p-5">
-      <div className="grid gap-3 lg:grid-cols-[1.3fr_.9fr_.9fr_.8fr_auto]">
+      <div className="grid gap-3 lg:grid-cols-[1.1fr_.9fr_.9fr_1fr_auto]">
         <label className="grid gap-2 text-xs font-bold uppercase tracking-[0.14em] text-white/78">
           {t("search.destination")}
-          <input
+          <select
             className="h-14 rounded-md border border-white/40 bg-white/92 px-4 text-base font-semibold text-[#17130f] outline-none transition focus:border-white"
             defaultValue="Almaty"
-            placeholder={t("search.destination")}
-          />
-        </label>
-        <label className="grid gap-2 text-xs font-bold uppercase tracking-[0.14em] text-white/78">
-          {t("search.checkIn")}
-          <input
-            className="h-14 rounded-md border border-white/40 bg-white/92 px-4 text-base font-semibold text-[#17130f] outline-none"
-            placeholder={t("search.checkIn")}
-            type="date"
-          />
-        </label>
-        <label className="grid gap-2 text-xs font-bold uppercase tracking-[0.14em] text-white/78">
-          {t("search.checkOut")}
-          <input
-            className="h-14 rounded-md border border-white/40 bg-white/92 px-4 text-base font-semibold text-[#17130f] outline-none"
-            placeholder={t("search.checkOut")}
-            type="date"
-          />
-        </label>
-        <label className="grid gap-2 text-xs font-bold uppercase tracking-[0.14em] text-white/78">
-          {t("search.guests")}
-          <select className="h-14 rounded-md border border-white/40 bg-white/92 px-4 text-base font-semibold text-[#17130f] outline-none">
-            <option>{t("search.guests.twoAdults")}</option>
-            <option>{t("search.guests.oneAdult")}</option>
-            <option>{t("search.guests.family")}</option>
+          >
+            {cityOptions.map((city) => (
+              <option key={city.value} value={city.value}>
+                {t(city.key)}
+              </option>
+            ))}
           </select>
         </label>
+
+        <DateField
+          inputRef={checkInRef}
+          label={t("search.checkIn")}
+          onOpen={() => openDatePicker(checkInRef.current)}
+        />
+        <DateField
+          inputRef={checkOutRef}
+          label={t("search.checkOut")}
+          onOpen={() => openDatePicker(checkOutRef.current)}
+        />
+
+        <div className="relative grid gap-2 text-xs font-bold uppercase tracking-[0.14em] text-white/78">
+          {t("search.guests")}
+          <details className="group">
+            <summary className="flex h-14 cursor-pointer list-none items-center justify-between rounded-md border border-white/40 bg-white/92 px-4 text-base font-semibold normal-case tracking-normal text-[#17130f] outline-none transition focus-visible:ring-2 focus-visible:ring-white">
+              <span>{guestSummary}</span>
+              <span aria-hidden="true" className="text-sm text-stone-500">▾</span>
+            </summary>
+            <div className="absolute left-0 right-0 z-30 mt-2 grid gap-3 rounded-lg border border-white/50 bg-white p-4 text-[#17130f] shadow-[0_24px_70px_rgba(23,19,15,.22)]">
+              {guestCategories.map((category) => (
+                <div className="flex items-center justify-between gap-4" key={category.key}>
+                  <span className="text-sm font-bold normal-case tracking-normal">
+                    {t(category.label)}
+                  </span>
+                  <div className="flex items-center gap-3">
+                    <button
+                      aria-label={t("search.guests.decrease")}
+                      className="flex h-9 w-9 items-center justify-center rounded-full border border-stone-300 text-lg font-bold disabled:cursor-not-allowed disabled:opacity-40"
+                      disabled={guests[category.key] <= (category.key === "adults" ? 1 : 0)}
+                      onClick={() => updateGuests(category.key, -1)}
+                      type="button"
+                    >
+                      -
+                    </button>
+                    <span className="w-5 text-center text-base font-bold">
+                      {guests[category.key]}
+                    </span>
+                    <button
+                      aria-label={t("search.guests.increase")}
+                      className="flex h-9 w-9 items-center justify-center rounded-full bg-[#2f4d46] text-lg font-bold text-white"
+                      onClick={() => updateGuests(category.key, 1)}
+                      type="button"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </details>
+        </div>
+
         <div className="flex items-end">
           <Link
             className="flex h-14 w-full items-center justify-center rounded-md bg-[#f0bb67] px-6 text-sm font-black uppercase tracking-[0.08em] text-[#17130f] shadow-xl transition hover:-translate-y-0.5 hover:bg-[#ffd189]"
-            href="/ai-search"
+            href="/hotels"
           >
             {t("common.search")}
           </Link>
         </div>
       </div>
+
+      <div className="rounded-lg border border-white/35 bg-white/14 p-4 shadow-inner backdrop-blur-xl">
+        <p
+          className="typing-effect max-w-4xl text-sm font-semibold leading-6 text-white sm:text-base"
+          key={locale}
+        >
+          {t("home.aiAssistant.prompt")}
+        </p>
+        <div className="mt-4 grid gap-3 md:grid-cols-[1fr_auto]">
+          <textarea
+            className="min-h-24 rounded-md border border-white/40 bg-white/92 px-4 py-3 text-base font-semibold text-[#17130f] outline-none transition placeholder:text-stone-500 focus:border-white"
+            placeholder={t("home.aiAssistant.placeholder")}
+          />
+          <Link
+            className="flex h-12 items-center justify-center rounded-md bg-white px-6 text-sm font-black uppercase tracking-[0.08em] text-[#2f4d46] transition hover:-translate-y-0.5 hover:bg-[#f4ead9] md:h-full"
+            href="/ai-search"
+          >
+            {t("home.aiAssistant.cta")}
+          </Link>
+        </div>
+      </div>
     </form>
+  );
+}
+
+function DateField({
+  inputRef,
+  label,
+  onOpen,
+}: {
+  inputRef: RefObject<HTMLInputElement | null>;
+  label: string;
+  onOpen: () => void;
+}) {
+  return (
+    <label className="grid gap-2 text-xs font-bold uppercase tracking-[0.14em] text-white/78">
+      {label}
+      <input
+        className="h-14 cursor-pointer rounded-md border border-white/40 bg-white/92 px-4 text-base font-semibold text-[#17130f] outline-none transition focus:border-white"
+        onClick={onOpen}
+        onFocus={onOpen}
+        placeholder="dd.mm.yyyy"
+        ref={inputRef}
+        type="date"
+      />
+    </label>
   );
 }
