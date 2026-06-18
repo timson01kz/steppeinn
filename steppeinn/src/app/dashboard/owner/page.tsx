@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { StatusBadge } from "@/components/dashboard/DashboardPrimitives";
+import { HeaderAuthActions } from "@/components/HeaderAuthActions";
 import { ownerBillingPlans } from "@/data/tariffs";
 import {
   addPropertySteps,
@@ -60,12 +61,7 @@ export default async function OwnerDashboardPage({
               SteppeInn
             </span>
           </Link>
-          <Link
-            className="rounded-full bg-[#17130f] px-5 py-2.5 text-sm font-bold text-white"
-            href="/for-hotels"
-          >
-            {t("dashboard.owner.partnerCenter")}
-          </Link>
+          <HeaderAuthActions />
         </div>
       </div>
 
@@ -85,12 +81,6 @@ export default async function OwnerDashboardPage({
               </a>
             ))}
           </nav>
-          <div className="mt-6 rounded-lg bg-[#17130f] p-4 text-white">
-            <p className="text-sm font-bold">{t("Mock mode")}</p>
-            <p className="mt-2 text-sm leading-6 text-white/62">
-              {t("dashboard.owner.mockDescription")}
-            </p>
-          </div>
         </aside>
 
         <div className="grid gap-8">
@@ -114,7 +104,7 @@ export default async function OwnerDashboardPage({
                 className="inline-flex rounded-md bg-white px-5 py-3 font-bold text-[#17130f]"
                 href="/dashboard/owner/properties/new"
               >
-                {t("Add property")}
+                {t("dashboard.owner.addObject")}
               </Link>
             </div>
             <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -144,7 +134,7 @@ export default async function OwnerDashboardPage({
                 <h2 className="mt-2 text-3xl font-semibold">{t("Listings")}</h2>
               </div>
               <Link className="font-bold text-[#2f4d46]" href="/dashboard/owner/properties/new">
-                {t("Create new listing")}
+                {t("dashboard.owner.addObject")}
               </Link>
             </div>
             {propertiesError ? (
@@ -213,7 +203,7 @@ export default async function OwnerDashboardPage({
             <p className="text-sm font-bold uppercase tracking-[0.2em] text-[#a66f2d]">
               {t("Add property")}
             </p>
-            <h2 className="mt-2 text-3xl font-semibold">{t("Listing flow placeholder")}</h2>
+            <h2 className="mt-2 text-3xl font-semibold">{t("dashboard.owner.addPropertyTitle")}</h2>
             <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
               {addPropertySteps.map((step, index) => (
                 <article
@@ -225,7 +215,7 @@ export default async function OwnerDashboardPage({
                   </span>
                   <h3 className="mt-4 text-xl font-semibold">{t(step as DictionaryKey)}</h3>
                   <p className="mt-2 text-sm leading-6 text-stone-600">
-                    {t("dashboard.owner.addStepPlaceholder")}
+                    {t(`dashboard.owner.addSteps.${step}` as DictionaryKey)}
                   </p>
                 </article>
               ))}
@@ -324,7 +314,7 @@ export default async function OwnerDashboardPage({
               ))}
               {bookingRequests.length === 0 ? (
                 <p className="rounded-lg border border-dashed border-stone-300 bg-[#fbf8f1] p-5 text-sm font-semibold text-stone-600">
-                  {t("No Supabase booking requests yet.")}
+                  {t("dashboard.owner.noBookingRequests")}
                 </p>
               ) : null}
             </div>
@@ -334,7 +324,7 @@ export default async function OwnerDashboardPage({
             <p className="text-sm font-bold uppercase tracking-[0.2em] text-[#a66f2d]">
               {t("Billing")}
             </p>
-            <h2 className="mt-2 text-3xl font-semibold">{t("Simple MVP pricing")}</h2>
+            <h2 className="mt-2 text-3xl font-semibold">{t("dashboard.owner.billingTitle")}</h2>
             <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
               {ownerBillingPlans.map((plan) => (
                 <article
@@ -342,7 +332,9 @@ export default async function OwnerDashboardPage({
                   key={plan.name}
                 >
                   <h3 className="text-lg font-semibold">{t(plan.name as DictionaryKey)}</h3>
-                  <p className="mt-4 text-2xl font-bold text-[#2f4d46]">{plan.price}</p>
+                  <p className="mt-4 text-2xl font-bold text-[#2f4d46]">
+                    {t(plan.price as DictionaryKey)}
+                  </p>
                   <p className="mt-3 text-sm leading-6 text-stone-600">
                     {t(plan.note as DictionaryKey)}
                   </p>
@@ -355,7 +347,7 @@ export default async function OwnerDashboardPage({
             <p className="text-sm font-bold uppercase tracking-[0.2em] text-[#a66f2d]">
               {t("Statistics")}
             </p>
-            <h2 className="mt-2 text-3xl font-semibold">{t("Performance snapshot")}</h2>
+            <h2 className="mt-2 text-3xl font-semibold">{t("dashboard.owner.statisticsTitle")}</h2>
             <div className="mt-6 grid gap-5 lg:grid-cols-[1fr_.8fr]">
               <div className="grid gap-4 sm:grid-cols-3">
                 {[
