@@ -21,9 +21,9 @@ const guestCategories = [
 ] satisfies Array<{ key: GuestKey; label: DictionaryKey }>;
 
 const fieldLabelClass =
-  "grid gap-2 font-[Arial,sans-serif] text-xs font-bold uppercase tracking-[0.14em] text-white/78";
+  "grid gap-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/72";
 const fieldControlClass =
-  "h-14 rounded-md border border-white/40 bg-white/92 px-4 font-[Arial,sans-serif] text-base font-semibold text-[#17130f] outline-none transition focus:border-white";
+  "h-[52px] rounded-xl border border-white/18 bg-white/88 px-4 text-[15px] font-semibold text-[#17130f] shadow-[inset_0_1px_0_rgb(255_255_255_/_55%)] outline-none backdrop-blur-xl transition placeholder:text-stone-500 hover:bg-white/94 focus:border-white/70 focus:bg-white";
 
 export function SearchBar() {
   const { locale, t } = useI18n();
@@ -62,8 +62,8 @@ export function SearchBar() {
       : `${guests.adults} ${adultLabel}`;
 
   return (
-    <form className="glass-panel animate-rise grid gap-4 p-4 font-[Arial,sans-serif] sm:p-5">
-      <div className="grid gap-3 lg:grid-cols-[1.1fr_.9fr_.9fr_1fr_auto]">
+    <form className="glass-panel animate-rise grid gap-3 p-3 sm:p-4">
+      <div className="grid gap-2.5 rounded-2xl border border-white/16 bg-white/10 p-2.5 shadow-[inset_0_1px_0_rgb(255_255_255_/_18%)] lg:grid-cols-[1.1fr_.9fr_.9fr_1fr_auto]">
         <label className={fieldLabelClass}>
           {t("search.destination")}
           <select className={fieldControlClass} defaultValue="Almaty">
@@ -89,16 +89,16 @@ export function SearchBar() {
         <div className={`relative ${fieldLabelClass}`}>
           {t("search.guests")}
           <details className="group">
-            <summary className="flex h-14 cursor-pointer list-none items-center justify-between rounded-md border border-white/40 bg-white/92 px-4 font-[Arial,sans-serif] text-base font-semibold normal-case tracking-normal text-[#17130f] outline-none transition focus-visible:ring-2 focus-visible:ring-white">
+            <summary className="flex h-[52px] cursor-pointer list-none items-center justify-between rounded-xl border border-white/18 bg-white/88 px-4 text-[15px] font-semibold normal-case tracking-normal text-[#17130f] shadow-[inset_0_1px_0_rgb(255_255_255_/_55%)] outline-none backdrop-blur-xl transition hover:bg-white/94 focus-visible:ring-2 focus-visible:ring-white/80">
               <span>{guestSummary}</span>
               <span aria-hidden="true" className="text-sm text-stone-500">
                 v
               </span>
             </summary>
-            <div className="absolute left-0 right-0 z-30 mt-2 grid gap-3 rounded-lg border border-white/50 bg-white p-4 text-[#17130f] shadow-[0_24px_70px_rgba(23,19,15,.22)]">
+            <div className="absolute left-0 right-0 z-30 mt-2 grid gap-3 rounded-2xl border border-white/70 bg-white/96 p-4 text-[#17130f] shadow-[0_24px_70px_rgba(23,19,15,.22)] backdrop-blur-xl">
               {guestCategories.map((category) => (
                 <div className="flex items-center justify-between gap-4" key={category.key}>
-                  <span className="font-[Arial,sans-serif] text-sm font-bold normal-case tracking-normal">
+                  <span className="text-sm font-bold normal-case tracking-normal">
                     {t(category.label)}
                   </span>
                   <div className="flex items-center gap-3">
@@ -111,7 +111,7 @@ export function SearchBar() {
                     >
                       -
                     </button>
-                    <span className="w-5 text-center font-[Arial,sans-serif] text-base font-bold">
+                    <span className="w-5 text-center text-base font-bold">
                       {guests[category.key]}
                     </span>
                     <button
@@ -131,7 +131,7 @@ export function SearchBar() {
 
         <div className="flex items-end">
           <Link
-            className="flex h-14 w-full items-center justify-center rounded-md bg-[#f0bb67] px-6 font-[Arial,sans-serif] text-sm font-black uppercase tracking-[0.08em] text-[#17130f] shadow-xl transition hover:-translate-y-0.5 hover:bg-[#ffd189]"
+            className="flex h-[52px] w-full items-center justify-center rounded-xl bg-[#f0bb67] px-6 text-sm font-bold uppercase tracking-[0.08em] text-[#17130f] shadow-[0_12px_34px_rgb(240_187_103_/_24%)] transition hover:-translate-y-0.5 hover:bg-[#ffd189]"
             href="/hotels"
           >
             {t("common.search")}
@@ -139,21 +139,21 @@ export function SearchBar() {
         </div>
       </div>
 
-      <div className="rounded-lg border border-white/25 bg-[#17130f]/42 p-3 shadow-[inset_0_1px_0_rgb(255_255_255_/_16%),0_18px_60px_rgb(23_19_15_/_18%)] backdrop-blur-2xl">
+      <div className="rounded-2xl border border-white/16 bg-white/10 p-2.5 shadow-[inset_0_1px_0_rgb(255_255_255_/_16%)] backdrop-blur-2xl">
         <p
-          className="typing-effect max-w-4xl font-[Arial,sans-serif] text-sm font-semibold leading-6 text-white/92"
+          className="typing-effect max-w-4xl text-sm font-medium leading-6 text-white/88"
           key={locale}
         >
           {t("home.aiAssistant.prompt")}
         </p>
-        <div className="mt-3 grid gap-3 md:grid-cols-[1fr_auto]">
+        <div className="mt-2.5 grid gap-2.5 md:grid-cols-[1fr_auto]">
           <input
-            className="h-12 rounded-md border border-white/35 bg-white/90 px-4 font-[Arial,sans-serif] text-sm font-semibold text-[#17130f] outline-none transition placeholder:text-stone-500 focus:border-white"
+            className="h-11 rounded-xl border border-white/18 bg-white/88 px-4 text-sm font-semibold text-[#17130f] shadow-[inset_0_1px_0_rgb(255_255_255_/_55%)] outline-none backdrop-blur-xl transition placeholder:text-stone-500 hover:bg-white/94 focus:border-white/70 focus:bg-white"
             placeholder={t("home.aiAssistant.placeholder")}
             type="text"
           />
           <Link
-            className="flex h-12 items-center justify-center rounded-md bg-white px-6 font-[Arial,sans-serif] text-sm font-black uppercase tracking-[0.08em] text-[#2f4d46] transition hover:-translate-y-0.5 hover:bg-[#f4ead9]"
+            className="flex h-11 items-center justify-center rounded-xl bg-white/94 px-6 text-sm font-bold uppercase tracking-[0.08em] text-[#2f4d46] shadow-[0_10px_26px_rgb(0_0_0_/_10%)] transition hover:-translate-y-0.5 hover:bg-white"
             href="/ai-search"
           >
             {t("home.aiAssistant.cta")}
