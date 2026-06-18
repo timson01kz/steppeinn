@@ -40,7 +40,7 @@ export default async function HotelDetailsPage({
     publishedProperty?.name ??
     (slug === hotelDetail.slug
       ? hotelDetail.name
-      : `${formatTitleFromSlug(slug)} (Mock Hotel)`);
+      : formatTitleFromSlug(slug));
   const detail = {
     type: publishedProperty?.type ?? hotelDetail.type,
     address: publishedProperty?.address ?? hotelDetail.address,
@@ -174,7 +174,7 @@ export default async function HotelDetailsPage({
 
           <section>
             <SectionTitle
-              description="Video modules are placeholders for future media uploads."
+              description="Video previews are coming soon for hotel overviews and room tours."
               eyebrow="Video"
               title="See the stay before booking."
             />
@@ -199,8 +199,8 @@ export default async function HotelDetailsPage({
             <SectionTitle
               description={
                 publishedProperty && publishedProperty.rooms.length > 0
-                  ? "Real room types and pricing loaded from Supabase."
-                  : "Mock room types with practical booking details."
+                  ? "Room types and pricing are available for this property."
+                  : "Explore room options with practical booking details."
               }
               eyebrow="Rooms"
               title="Choose your room."
@@ -251,7 +251,7 @@ export default async function HotelDetailsPage({
 
           <section>
             <SectionTitle
-              description="Distances are mock values for the first version."
+              description="Explore nearby places and plan your stay around Almaty highlights."
               eyebrow="What is nearby"
               title="Almaty highlights around the stay."
             />
@@ -307,7 +307,7 @@ export default async function HotelDetailsPage({
 
           <section>
             <SectionTitle
-              description="Mock guest sentiment for product layout validation."
+              description="Guest impressions help you understand the atmosphere before you book."
               eyebrow="Reviews"
               title="Loved by city explorers."
             />
@@ -328,7 +328,7 @@ export default async function HotelDetailsPage({
 
           <section>
             <SectionTitle
-              description="More mock stays from the same discovery surface."
+              description="More places to compare for your Almaty trip."
               eyebrow="Similar hotels"
               title="Keep exploring Almaty."
             />

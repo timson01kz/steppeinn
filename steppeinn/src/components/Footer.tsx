@@ -11,7 +11,7 @@ const links = [
 ];
 
 export function Footer() {
-  const { translate } = useI18n();
+  const { t, translate } = useI18n();
 
   return (
     <footer className="border-t border-stone-200 bg-[#17130f] px-5 py-12 text-white sm:px-8">
@@ -21,9 +21,7 @@ export function Footer() {
             SteppeInn
           </Link>
           <p className="mt-4 max-w-xl leading-7 text-white/62">
-            {translate(
-              "Premium Kazakhstan travel shell for hotels, city discovery, and partner operations. Built with mock data for the MVP stage.",
-            )}
+            {t("footer.description")}
           </p>
         </div>
         <div className="flex flex-wrap gap-4 md:justify-end">

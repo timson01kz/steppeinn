@@ -7,7 +7,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "SteppeInn | Premium stays in Almaty",
   description:
-    "SteppeInn MVP shell for premium travel stays, maps, and hotel partners in Almaty.",
+    "SteppeInn helps travelers find hotels and hostels across Kazakhstan.",
 };
 
 const cookieName = "steppeinn_locale";

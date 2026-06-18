@@ -55,8 +55,8 @@ export function BookingRequestForm({
         </p>
         <h2 className="mt-2 text-2xl font-semibold">Send a request</h2>
         <p className="mt-2 text-sm leading-6 text-stone-600">
-          Authenticated clients can send pending booking requests. Payment stays
-          disabled.
+          Sign in to send a booking request. The hotel will reply with
+          availability details.
         </p>
       </div>
       {bookingError ? (
@@ -66,7 +66,7 @@ export function BookingRequestForm({
       ) : null}
       {!propertyId ? (
         <div className="rounded-lg border border-stone-200 bg-[#fbf8f1] px-4 py-3 text-sm font-semibold text-stone-600">
-          Real booking requests are available for published Supabase properties.
+          Booking requests are available for published properties.
         </div>
       ) : null}
       {[
