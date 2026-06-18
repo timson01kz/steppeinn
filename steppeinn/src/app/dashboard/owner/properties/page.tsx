@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { StatusBadge } from "@/components/dashboard/DashboardPrimitives";
+import { HeaderAuthActions } from "@/components/HeaderAuthActions";
+import { getServerI18n } from "@/i18n/server";
 import {
   deletePropertyPhotoAction,
   markPrimaryPhotoAction,
@@ -13,6 +15,7 @@ import {
 } from "@/lib/actions/propertyRoomActions";
 import { getCurrentOwnerProperties } from "@/lib/services/propertyService";
 import type { PropertyRoom } from "@/lib/services/propertyService";
+import type { DictionaryKey } from "@/i18n";
 
 export const dynamic = "force-dynamic";
 
@@ -27,6 +30,7 @@ export default async function OwnerPropertiesPage({
   }>;
 }) {
   const params = await searchParams;
+  const { t } = await getServerI18n();
   const { data: properties, error } = await getCurrentOwnerProperties();
 
   return (
@@ -41,23 +45,20 @@ export default async function OwnerPropertiesPage({
               SteppeInn Owner
             </span>
           </Link>
-          <Link className="font-bold text-[#2f4d46]" href="/dashboard/owner/properties/new">
-            Add property
-          </Link>
+          <HeaderAuthActions />
         </div>
       </div>
 
       <div className="mx-auto max-w-7xl px-5 py-8 sm:px-8">
         <section className="rounded-lg bg-[#17130f] p-6 text-white shadow-[0_28px_90px_rgba(34,28,18,.16)] sm:p-8">
           <p className="text-sm font-bold uppercase tracking-[0.2em] text-[#f0bb67]">
-            Property photos
+            {t("dashboard.owner.photos.eyebrow")}
           </p>
           <h1 className="mt-3 text-4xl font-semibold sm:text-5xl">
-            Upload real listing images.
+            {t("dashboard.owner.photos.title")}
           </h1>
           <p className="mt-4 max-w-3xl leading-7 text-white/68">
-            Photos are stored in Supabase Storage and saved to property_media.
-            Videos remain mock-only for now.
+            {t("dashboard.owner.photos.description")}
           </p>
         </section>
 
@@ -99,22 +100,23 @@ export default async function OwnerPropertiesPage({
                   className="rounded-md bg-[#17130f] px-4 py-2 text-sm font-bold text-white"
                   href={`/hotels/${property.slug}`}
                 >
-                  Preview
+                  {t("dashboard.owner.open")}
                 </Link>
               </div>
 
               <section className="mt-6 rounded-lg border border-stone-200 bg-[#fbf8f1] p-5">
                 <div>
                   <p className="text-sm font-bold uppercase tracking-[0.2em] text-[#a66f2d]">
-                    Rooms and pricing
+                    {t("dashboard.owner.roomsPricing")}
                   </p>
-                  <h3 className="mt-2 text-2xl font-semibold">Room inventory</h3>
+                  <h3 className="mt-2 text-2xl font-semibold">{t("dashboard.owner.roomInventory")}</h3>
                 </div>
 
                 <RoomForm
                   action={createPropertyRoomAction}
                   propertyId={property.id}
-                  submitLabel="Create room"
+                  submitLabel={t("dashboard.owner.createRoom")}
+                  t={t}
                 />
 
                 {property.rooms.length > 0 ? (
@@ -131,8 +133,8 @@ export default async function OwnerPropertiesPage({
                               <StatusBadge status={room.availabilityStatus} />
                             </div>
                             <p className="mt-2 text-sm font-semibold text-stone-600">
-                              {room.roomType ?? "Room"} · {room.maxGuests} guests ·{" "}
-                              {room.areaM2 ?? "-"} m2 · {room.quantity} units
+                              {room.roomType ?? t("Room")} · {room.maxGuests} {t("Guests")} ·{" "}
+                              {room.areaM2 ?? "-"} m2 · {room.quantity} {t("dashboard.owner.units")}
                             </p>
                             {room.description ? (
                               <p className="mt-3 text-sm leading-6 text-stone-600">
@@ -148,7 +150,8 @@ export default async function OwnerPropertiesPage({
                           action={updatePropertyRoomAction}
                           propertyId={property.id}
                           room={room}
-                          submitLabel="Save room"
+                          submitLabel={t("dashboard.owner.saveRoom")}
+                          t={t}
                         />
                         <form action={deletePropertyRoomAction} className="mt-3">
                           <input name="property_id" type="hidden" value={property.id} />
@@ -157,7 +160,7 @@ export default async function OwnerPropertiesPage({
                             className="rounded-md border border-[#efc4bd] bg-white px-4 py-2 text-sm font-bold text-[#9b2d25]"
                             type="submit"
                           >
-                            Delete room
+                            {t("dashboard.owner.deleteRoom")}
                           </button>
                         </form>
                       </article>
@@ -165,8 +168,7 @@ export default async function OwnerPropertiesPage({
                   </div>
                 ) : (
                   <p className="mt-6 rounded-lg border border-dashed border-stone-300 bg-white p-5 text-sm font-semibold text-stone-600">
-                    No rooms yet. Add at least one room type so public hotel pages
-                    can show real pricing and capacity.
+                    {t("dashboard.owner.noRooms")}
                   </p>
                 )}
               </section>
@@ -176,7 +178,7 @@ export default async function OwnerPropertiesPage({
                 <div className="grid gap-4 md:grid-cols-[1fr_.8fr_auto] md:items-end">
                   <label className="grid gap-2">
                     <span className="text-xs font-bold uppercase tracking-[0.14em] text-stone-500">
-                      Photos
+                      {t("dashboard.owner.photos.label")}
                     </span>
                     <input
                       accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
@@ -189,20 +191,20 @@ export default async function OwnerPropertiesPage({
                   </label>
                   <label className="grid gap-2">
                     <span className="text-xs font-bold uppercase tracking-[0.14em] text-stone-500">
-                      Alt text
+                      {t("dashboard.owner.photos.altText")}
                     </span>
                     <input
                       className="rounded-md border border-stone-300 bg-white px-4 py-3 text-sm font-semibold outline-none focus:border-[#2f4d46]"
                       name="alt_text"
-                      placeholder="Hotel exterior in Almaty"
+                      placeholder={t("dashboard.owner.photos.altPlaceholder")}
                     />
                   </label>
                   <button className="rounded-md bg-[#2f4d46] px-5 py-3 text-sm font-bold text-white" type="submit">
-                    Upload photos
+                    {t("dashboard.owner.photos.upload")}
                   </button>
                 </div>
                 <p className="text-sm font-semibold text-stone-600">
-                  JPG, JPEG, PNG, or WEBP only. Maximum 5MB per image.
+                  {t("dashboard.owner.photos.requirements")}
                 </p>
               </form>
 
@@ -220,7 +222,7 @@ export default async function OwnerPropertiesPage({
                       <div className="grid gap-3 p-4">
                         <div className="flex items-center justify-between gap-3">
                           <p className="text-sm font-semibold text-stone-600">
-                            Sort {photo.sortOrder}
+                            {t("dashboard.owner.photos.sort")} {photo.sortOrder}
                           </p>
                           {photo.isPrimary ? <StatusBadge status="primary" /> : null}
                         </div>
@@ -231,7 +233,7 @@ export default async function OwnerPropertiesPage({
                           {!photo.isPrimary ? (
                             <PhotoAction
                               action={markPrimaryPhotoAction}
-                              label="Primary"
+                              label={t("dashboard.owner.photos.primary")}
                               photoId={photo.id}
                               propertyId={property.id}
                             />
@@ -240,7 +242,7 @@ export default async function OwnerPropertiesPage({
                             action={reorderPropertyPhotoAction}
                             direction="up"
                             disabled={index === 0}
-                            label="Up"
+                            label={t("dashboard.owner.photos.up")}
                             photoId={photo.id}
                             propertyId={property.id}
                           />
@@ -248,13 +250,13 @@ export default async function OwnerPropertiesPage({
                             action={reorderPropertyPhotoAction}
                             direction="down"
                             disabled={index === property.photos.length - 1}
-                            label="Down"
+                            label={t("dashboard.owner.photos.down")}
                             photoId={photo.id}
                             propertyId={property.id}
                           />
                           <PhotoAction
                             action={deletePropertyPhotoAction}
-                            label="Delete"
+                            label={t("dashboard.owner.photos.delete")}
                             photoId={photo.id}
                             propertyId={property.id}
                             tone="danger"
@@ -266,8 +268,7 @@ export default async function OwnerPropertiesPage({
                 </div>
               ) : (
                 <p className="mt-6 rounded-lg border border-dashed border-stone-300 bg-[#fbf8f1] p-5 text-sm font-semibold text-stone-600">
-                  No real photos uploaded yet. Public pages will use mock fallback
-                  images until the first photo is added.
+                  {t("dashboard.owner.photos.empty")}
                 </p>
               )}
             </article>
@@ -283,18 +284,20 @@ function RoomForm({
   propertyId,
   room,
   submitLabel,
+  t,
 }: {
   action: (formData: FormData) => Promise<void>;
   propertyId: string;
   room?: PropertyRoom;
   submitLabel: string;
+  t: (key: DictionaryKey) => string;
 }) {
   return (
     <form action={action} className="mt-5 grid gap-4 rounded-lg border border-stone-200 bg-white p-5">
       <input name="property_id" type="hidden" value={propertyId} />
       {room ? <input name="room_id" type="hidden" value={room.id} /> : null}
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <RoomField label="Room name">
+        <RoomField label={t("dashboard.owner.roomName")}>
           <input
             className={roomInputClass}
             defaultValue={room?.name}
@@ -303,7 +306,7 @@ function RoomForm({
             required
           />
         </RoomField>
-        <RoomField label="Room type">
+        <RoomField label={t("dashboard.owner.roomType")}>
           <input
             className={roomInputClass}
             defaultValue={room?.roomType ?? ""}
@@ -312,7 +315,7 @@ function RoomForm({
             required
           />
         </RoomField>
-        <RoomField label="Bed type">
+        <RoomField label={t("dashboard.owner.bedType")}>
           <input
             className={roomInputClass}
             defaultValue={room?.bedType ?? ""}
@@ -321,27 +324,27 @@ function RoomForm({
             required
           />
         </RoomField>
-        <RoomField label="Status">
+        <RoomField label={t("Status")}>
           <select
             className={roomInputClass}
             defaultValue={room?.availabilityStatus ?? "available"}
             name="availability_status"
           >
-            <option value="available">available</option>
-            <option value="unavailable">unavailable</option>
+            <option value="available">{t("available")}</option>
+            <option value="unavailable">{t("unavailable")}</option>
           </select>
         </RoomField>
       </div>
-      <RoomField label="Description">
+      <RoomField label={t("dashboard.owner.roomDescription")}>
         <textarea
           className={`${roomInputClass} min-h-24 resize-y`}
           defaultValue={room?.description ?? ""}
           name="description"
-          placeholder="Short room description for guests."
+          placeholder={t("dashboard.owner.roomDescriptionPlaceholder")}
         />
       </RoomField>
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <RoomField label="Area m2">
+        <RoomField label={t("dashboard.owner.areaM2")}>
           <input
             className={roomInputClass}
             defaultValue={room?.areaM2 ?? ""}
@@ -350,7 +353,7 @@ function RoomForm({
             type="number"
           />
         </RoomField>
-        <RoomField label="Max guests">
+        <RoomField label={t("dashboard.owner.maxGuests")}>
           <input
             className={roomInputClass}
             defaultValue={room?.maxGuests ?? 2}
@@ -360,7 +363,7 @@ function RoomForm({
             type="number"
           />
         </RoomField>
-        <RoomField label="Quantity">
+        <RoomField label={t("dashboard.owner.quantity")}>
           <input
             className={roomInputClass}
             defaultValue={room?.quantity ?? 1}
@@ -370,7 +373,7 @@ function RoomForm({
             type="number"
           />
         </RoomField>
-        <RoomField label="Price per night">
+        <RoomField label={t("dashboard.owner.pricePerNight")}>
           <input
             className={roomInputClass}
             defaultValue={room?.pricePerNight ?? ""}

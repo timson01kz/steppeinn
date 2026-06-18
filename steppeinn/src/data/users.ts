@@ -61,7 +61,7 @@ export const ownerMetrics = [
   { label: "Total views", value: "18 420", trend: "+14% this month" },
   { label: "Booking requests", value: "126", trend: "+22 new" },
   { label: "Published properties", value: "8", trend: "2 premium" },
-  { label: "Pending moderation", value: "3", trend: "avg 8h review" },
+  { label: "Pending moderation", value: "3", trend: "Average review time" },
 ];
 
 export const ownerProperties: OwnerProperty[] = [

@@ -111,6 +111,7 @@ export function HeaderAuthActions({ overlay = false }: HeaderAuthActionsProps) {
   }
 
   const dashboardHref = roleHome[account.role];
+  const ownerMenu = account.role === "owner";
 
   return (
     <details className="group relative">
@@ -125,10 +126,21 @@ export function HeaderAuthActions({ overlay = false }: HeaderAuthActionsProps) {
             : "border-stone-200 bg-white text-[#17130f]"
         }`}
       >
-        <HeaderMenuLink href={dashboardHref} label={translate("My dashboard")} />
-        <HeaderMenuLink href="/dashboard/client#bookings" label={translate("My bookings")} />
-        <HeaderMenuLink href="/dashboard/client#favorites" label={translate("Favorites")} />
-        <HeaderMenuLink href="/dashboard/client#profile" label={translate("Profile")} />
+        {ownerMenu ? (
+          <>
+            <HeaderMenuLink href="/dashboard/owner" label={translate("dashboard.owner.menu.dashboard")} />
+            <HeaderMenuLink href="/dashboard/owner#properties" label={translate("dashboard.owner.menu.properties")} />
+            <HeaderMenuLink href="/dashboard/owner/properties/new" label={translate("dashboard.owner.menu.addProperty")} />
+            <HeaderMenuLink href="/dashboard/owner#billing" label={translate("dashboard.owner.menu.tariffs")} />
+          </>
+        ) : (
+          <>
+            <HeaderMenuLink href={dashboardHref} label={translate("My dashboard")} />
+            <HeaderMenuLink href="/dashboard/client#bookings" label={translate("My bookings")} />
+            <HeaderMenuLink href="/dashboard/client#favorites" label={translate("Favorites")} />
+            <HeaderMenuLink href="/dashboard/client#profile" label={translate("Profile")} />
+          </>
+        )}
         <button
           className={`mt-1 w-full rounded-md px-3 py-2 text-left transition ${
             overlay ? "hover:bg-white/10" : "hover:bg-[#f6f3ed]"

@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { HeaderAuthActions } from "@/components/HeaderAuthActions";
+import { getServerI18n } from "@/i18n/server";
 import { createOwnerPropertyAction } from "@/lib/actions/propertyActions";
 
 const propertyTypes = ["Hotel", "Boutique hotel", "Apartment", "Guest house", "Resort"];
@@ -9,6 +11,7 @@ export default async function NewOwnerPropertyPage({
   searchParams: Promise<{ error?: string; success?: string }>;
 }) {
   const params = await searchParams;
+  const { t } = await getServerI18n();
 
   return (
     <main className="min-h-screen bg-[#f6f3ed] text-[#17130f]">
@@ -22,29 +25,25 @@ export default async function NewOwnerPropertyPage({
               SteppeInn Owner
             </span>
           </Link>
-          <Link className="font-bold text-[#2f4d46]" href="/dashboard/owner">
-            Back to dashboard
-          </Link>
+          <HeaderAuthActions />
         </div>
       </div>
 
       <div className="mx-auto grid max-w-7xl gap-6 px-5 py-8 sm:px-8 lg:grid-cols-[.7fr_1.3fr]">
         <section className="h-fit rounded-lg bg-[#17130f] p-6 text-white shadow-[0_28px_90px_rgba(34,28,18,.16)] sm:p-8 lg:sticky lg:top-6">
           <p className="text-sm font-bold uppercase tracking-[0.2em] text-[#f0bb67]">
-            Add property
+            {t("dashboard.owner.addObject")}
           </p>
           <h1 className="mt-3 text-4xl font-semibold sm:text-5xl">
-            Submit a listing for moderation.
+            {t("dashboard.owner.addPropertyTitle")}
           </h1>
           <p className="mt-4 leading-7 text-white/68">
-            This MVP form saves the core property profile to Supabase and keeps
-            photos and videos as mock-only placeholders for now.
+            {t("dashboard.owner.newPropertyDescription")}
           </p>
           <div className="mt-8 rounded-lg border border-white/12 bg-white/10 p-5">
-            <p className="text-sm font-bold text-white">Moderation state</p>
+            <p className="text-sm font-bold text-white">{t("dashboard.owner.moderationState")}</p>
             <p className="mt-2 text-sm leading-6 text-white/62">
-              New submissions are saved with pending status and assigned to the
-              authenticated owner account.
+              {t("dashboard.owner.moderationStateDescription")}
             </p>
           </div>
         </section>
@@ -52,19 +51,19 @@ export default async function NewOwnerPropertyPage({
         <section className="rounded-lg border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
           <div>
             <p className="text-sm font-bold uppercase tracking-[0.2em] text-[#a66f2d]">
-              Property profile
+              {t("dashboard.owner.propertyProfile")}
             </p>
-            <h2 className="mt-2 text-3xl font-semibold">Basic details</h2>
+            <h2 className="mt-2 text-3xl font-semibold">{t("Basic details")}</h2>
           </div>
 
           {params.success ? (
             <div className="mt-6 flex flex-col gap-4 rounded-lg border border-[#b8dcc7] bg-[#e9f8ee] px-5 py-4 font-semibold text-[#1f6b43] sm:flex-row sm:items-center sm:justify-between">
-              <span>Property submitted for moderation.</span>
+              <span>{t("Property submitted for moderation.")}</span>
               <Link
                 className="inline-flex rounded-md bg-[#17130f] px-4 py-2 text-sm font-bold text-white"
                 href="/dashboard/owner/properties"
               >
-                Manage photos
+                {t("Manage photos")}
               </Link>
             </div>
           ) : null}
@@ -77,10 +76,10 @@ export default async function NewOwnerPropertyPage({
 
           <form action={createOwnerPropertyAction} className="mt-6 grid gap-5">
             <div className="grid gap-5 md:grid-cols-2">
-              <Field label="Title">
+              <Field label={t("Title")}>
                 <input name="title" required className={inputClass} placeholder="Medeu Alpine Rooms" />
               </Field>
-              <Field label="Property type">
+              <Field label={t("Property type")}>
                 <select name="property_type" required className={inputClass} defaultValue="Hotel">
                   {propertyTypes.map((type) => (
                     <option key={type} value={type}>
@@ -92,24 +91,24 @@ export default async function NewOwnerPropertyPage({
             </div>
 
             <div className="grid gap-5 md:grid-cols-2">
-              <Field label="City">
+              <Field label={t("City")}>
                 <input name="city" required className={inputClass} defaultValue="Almaty" />
               </Field>
-              <Field label="Address">
+              <Field label={t("Address")}>
                 <input name="address" required className={inputClass} placeholder="Dostyk Avenue 85" />
               </Field>
             </div>
 
             <div className="grid gap-5 md:grid-cols-2">
-              <Field label="Latitude">
+              <Field label={t("Latitude")}>
                 <input name="latitude" inputMode="decimal" className={inputClass} placeholder="43.2389" />
               </Field>
-              <Field label="Longitude">
+              <Field label={t("Longitude")}>
                 <input name="longitude" inputMode="decimal" className={inputClass} placeholder="76.8897" />
               </Field>
             </div>
 
-            <Field label="Short description">
+            <Field label={t("Short description")}>
               <input
                 name="short_description"
                 required
@@ -118,7 +117,7 @@ export default async function NewOwnerPropertyPage({
               />
             </Field>
 
-            <Field label="Full description">
+            <Field label={t("Full description")}>
               <textarea
                 name="description"
                 required
@@ -128,14 +127,14 @@ export default async function NewOwnerPropertyPage({
             </Field>
 
             <div className="grid gap-5 md:grid-cols-2">
-              <Field label="Amenities">
+              <Field label={t("Amenities")}>
                 <input
                   name="amenities"
                   className={inputClass}
                   placeholder="Wi-Fi, Parking, Breakfast, Mountain view"
                 />
               </Field>
-              <Field label="Starting price">
+              <Field label={t("Starting price")}>
                 <input
                   name="price_from"
                   required
@@ -148,12 +147,9 @@ export default async function NewOwnerPropertyPage({
             </div>
 
             <div className="rounded-lg border border-dashed border-stone-300 bg-[#fbf8f1] p-5">
-              <p className="font-semibold">Photos and videos</p>
+              <p className="font-semibold">{t("Photos and videos")}</p>
               <p className="mt-2 text-sm leading-6 text-stone-600">
-                Photos are managed after the property is submitted. Create the
-                property first, then open My Properties to upload photos, choose
-                a primary image, reorder photos, or delete them. Video upload is
-                coming later.
+                {t("dashboard.owner.photosAfterSubmit")}
               </p>
             </div>
 
@@ -161,7 +157,7 @@ export default async function NewOwnerPropertyPage({
               className="rounded-md bg-[#17130f] px-5 py-3 font-bold text-white transition hover:bg-[#2f4d46]"
               type="submit"
             >
-              Submit for moderation
+              {t("Submit for moderation")}
             </button>
           </form>
         </section>
