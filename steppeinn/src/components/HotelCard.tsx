@@ -30,9 +30,6 @@ export function HotelCard({ hotel }: HotelCardProps) {
         <span className="absolute left-4 top-4 rounded-full bg-white/92 px-3 py-1 text-sm font-bold text-[#17130f] shadow-sm">
           {hotel.rating}
         </span>
-        <span className="absolute bottom-4 left-4 rounded-full border border-white/35 bg-white/18 px-3 py-1 text-xs font-bold uppercase tracking-[0.12em] text-white backdrop-blur">
-          {hotel.imageUrl ? translate("Photo") : translate("Mock image")}
-        </span>
       </div>
       <div className="p-5">
         <div className="flex items-start justify-between gap-4">

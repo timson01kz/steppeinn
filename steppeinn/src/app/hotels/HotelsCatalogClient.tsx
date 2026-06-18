@@ -79,10 +79,10 @@ export function HotelsCatalogClient({
       <section className="mx-auto w-full max-w-7xl px-5 pb-8 pt-10 sm:px-8">
         <div className="rounded-lg bg-[#17130f] p-6 text-white shadow-[0_28px_90px_rgba(34,28,18,.16)] sm:p-10">
           <SectionTitle
-            description="Search and compare mock Almaty hotels by price, rating, amenities, property type, and nearby place."
-            eyebrow="Hotel catalog"
+            description={t("catalog.description")}
+            eyebrow={t("Hotel catalog")}
             tone="dark"
-            title="Find the right stay for Almaty."
+            title={t("Find the right stay for Almaty.")}
           />
           <div className="mt-8 grid gap-3 lg:grid-cols-[1fr_auto_auto]">
             <input

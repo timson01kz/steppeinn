@@ -89,7 +89,9 @@ export function SearchBar() {
         <div className={`relative ${fieldLabelClass}`}>
           {t("search.guests")}
           <details className="group">
-            <summary className="flex h-[52px] cursor-pointer list-none items-center justify-between rounded-xl border border-white/18 bg-white/88 px-4 text-[15px] font-semibold normal-case tracking-normal text-[#17130f] shadow-[inset_0_1px_0_rgb(255_255_255_/_55%)] outline-none backdrop-blur-xl transition hover:bg-white/94 focus-visible:ring-2 focus-visible:ring-white/80">
+            <summary
+              className={`${fieldControlClass} flex cursor-pointer list-none items-center justify-between focus-visible:ring-2 focus-visible:ring-white/80`}
+            >
               <span>{guestSummary}</span>
               <span aria-hidden="true" className="text-sm text-stone-500">
                 v
@@ -131,7 +133,7 @@ export function SearchBar() {
 
         <div className="flex items-end">
           <Link
-            className="flex h-[52px] w-full items-center justify-center rounded-xl bg-[#f0bb67] px-6 text-sm font-bold uppercase tracking-[0.08em] text-[#17130f] shadow-[0_12px_34px_rgb(240_187_103_/_24%)] transition hover:-translate-y-0.5 hover:bg-[#ffd189]"
+            className="flex h-[52px] w-full items-center justify-center rounded-xl bg-[#f0bb67] px-6 text-[15px] font-semibold tracking-normal text-[#17130f] shadow-[0_12px_34px_rgb(240_187_103_/_24%)] transition hover:-translate-y-0.5 hover:bg-[#ffd189]"
             href="/hotels"
           >
             {t("common.search")}
