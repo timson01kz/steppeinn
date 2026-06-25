@@ -64,7 +64,7 @@ select {
   font-weight: 600;
   letter-spacing: 0;
   line-height: 1.2;
-  text-transform: none;
+  text-transform: none !important;
 }
 
 .hero-day {
