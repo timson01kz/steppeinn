@@ -31,7 +31,9 @@ export function Header({ overlay = false }: HeaderProps) {
         >
           S
         </span>
-        <span className="text-xl font-semibold tracking-[0.08em]">SteppeInn</span>
+        <span className="hidden text-xl font-semibold tracking-[0.08em] sm:inline">
+          SteppeInn
+        </span>
       </Link>
 
       <nav className="hidden items-center gap-8 text-sm font-semibold lg:flex">
