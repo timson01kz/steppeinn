@@ -49,7 +49,7 @@ export function Header({ overlay = false }: HeaderProps) {
       </nav>
 
       <div className="flex items-center gap-2">
-        <div className="hidden md:block">
+        <div>
           <LanguageSwitcher variant={overlay ? "light" : "dark"} />
         </div>
         <HeaderAuthActions overlay={overlay} />
