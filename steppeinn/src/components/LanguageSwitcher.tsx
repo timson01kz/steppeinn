@@ -12,9 +12,17 @@ export function LanguageSwitcher({ variant = "light", size = "default" }: Langua
   const isMobile = size === "mobile";
   const { locale, setLocale } = useI18n();
 
+  function handleLocaleClick(nextLocale: typeof supportedLocales[number]) {
+    if (process.env.NODE_ENV !== "production") {
+      console.log("language clicked", nextLocale);
+    }
+
+    setLocale(nextLocale);
+  }
+
   return (
     <div
-      className={`flex flex-nowrap items-center rounded-full text-xs font-semibold whitespace-nowrap shadow-sm backdrop-blur-xl pointer-events-auto ${
+      className={`relative flex flex-nowrap items-center rounded-full text-xs font-semibold whitespace-nowrap shadow-sm backdrop-blur-xl pointer-events-auto ${
         isMobile ? "h-10 w-[126px] gap-1 p-0.5" : "h-9 p-0"
       } ${
         isLight
@@ -24,7 +32,7 @@ export function LanguageSwitcher({ variant = "light", size = "default" }: Langua
     >
       {supportedLocales.map((lang) => (
         <button
-          className={`rounded-full leading-none whitespace-nowrap transition pointer-events-auto ${
+          className={`relative z-[60] rounded-full leading-none whitespace-nowrap transition pointer-events-auto [touch-action:manipulation] ${
             isMobile
               ? "flex h-9 min-w-0 flex-1 items-center justify-center px-0"
               : "h-9 min-w-9 px-2.5"
@@ -40,7 +48,11 @@ export function LanguageSwitcher({ variant = "light", size = "default" }: Langua
                 : "hover:bg-stone-100"
           }`}
           key={lang}
-          onClick={() => setLocale(lang)}
+          onClick={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            handleLocaleClick(lang);
+          }}
           type="button"
         >
           {localeLabels[lang]}
