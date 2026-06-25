@@ -19,7 +19,7 @@ export function Header({ overlay = false }: HeaderProps) {
 
   return (
     <header
-      className={`relative z-20 mx-auto flex w-full max-w-7xl items-center justify-between px-5 py-5 sm:px-8 ${
+      className={`relative z-50 mx-auto flex w-full max-w-7xl items-center justify-between px-5 py-5 sm:px-8 ${
         overlay ? "text-white" : "text-[#17130f]"
       }`}
     >
@@ -50,7 +50,11 @@ export function Header({ overlay = false }: HeaderProps) {
         ))}
       </nav>
 
-      <div className="flex items-center gap-2">
+      <div className="relative z-50 flex shrink-0 items-center rounded-full pointer-events-auto sm:hidden">
+        <LanguageSwitcher variant={overlay ? "light" : "dark"} />
+      </div>
+
+      <div className="hidden items-center gap-2 sm:flex">
         <div>
           <LanguageSwitcher variant={overlay ? "light" : "dark"} />
         </div>
