@@ -51,7 +51,7 @@ export function Header({ overlay = false }: HeaderProps) {
       </nav>
 
       <div className="relative z-50 flex shrink-0 items-center rounded-full pointer-events-auto sm:hidden">
-        <LanguageSwitcher variant={overlay ? "light" : "dark"} />
+        <LanguageSwitcher size="mobile" variant={overlay ? "light" : "dark"} />
       </div>
 
       <div className="hidden items-center gap-2 sm:flex">
