@@ -22,10 +22,9 @@ const guestCategories = [
 
 const fieldLabelClass =
   "grid gap-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/72";
-const fieldValueTypographyClass =
-  "text-[13px] font-semibold leading-[1.2] tracking-normal";
+const searchControlValueClass = "search-control-value";
 const fieldControlClass =
-  `h-[52px] rounded-xl border border-white/18 bg-white/88 px-4 ${fieldValueTypographyClass} text-[#17130f] shadow-[inset_0_1px_0_rgb(255_255_255_/_55%)] outline-none backdrop-blur-xl transition placeholder:text-stone-500 hover:bg-white/94 focus:border-white/70 focus:bg-white`;
+  `h-[52px] rounded-xl border border-white/18 bg-white/88 px-4 ${searchControlValueClass} text-[#17130f] shadow-[inset_0_1px_0_rgb(255_255_255_/_55%)] outline-none backdrop-blur-xl transition placeholder:text-stone-500 hover:bg-white/94 focus:border-white/70 focus:bg-white`;
 
 export function SearchBar() {
   const { locale, t } = useI18n();
@@ -94,7 +93,7 @@ export function SearchBar() {
             <summary
               className={`${fieldControlClass} flex cursor-pointer list-none items-center justify-between focus-visible:ring-2 focus-visible:ring-white/80`}
             >
-              <span className={fieldValueTypographyClass}>{guestSummary}</span>
+              <span className={searchControlValueClass}>{guestSummary}</span>
               <span aria-hidden="true" className="text-sm text-stone-500">
                 v
               </span>

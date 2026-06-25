@@ -58,6 +58,15 @@ select {
   backdrop-filter: blur(30px) saturate(1.22);
 }
 
+.search-control-value {
+  font-family: var(--font-apple-system);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0;
+  line-height: 1.2;
+  text-transform: none;
+}
+
 .hero-day {
   background-color: #2f7584;
   background:
